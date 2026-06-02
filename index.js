@@ -54,7 +54,7 @@ app.post('/api/register', async (req, res) => {
     }
     const customerId = uuidv4();
     const shortCode = Math.floor(1000000 + Math.random() * 9000000).toString();
-    const customerData = { customerId, phone, name, merchantId, stamps: 0, totalGifts: 0, shortCode, createdAt: admin.firestore.FieldValue.serverTimestamp() };
+    const customerData = { customerId, phone, name, merchantId, stamps: 0, totalGifts: 0, shortCode, authToken: "loyalty2024secure", createdAt: admin.firestore.FieldValue.serverTimestamp() };
     await db.collection('customers').doc(customerId).set(customerData);
     res.json({ customerId, ...customerData, exists: false });
   } catch (err) { res.status(500).json({ error: err.message }); }
