@@ -135,7 +135,7 @@ const lines = wwdrVal.split('\n'); console.log('WWDR lines:', lines.length, 'fir
     pass.setBarcodes({ message: customerId, format: 'PKBarcodeFormatQR', messageEncoding: 'iso-8859-1' });
 
     const buffer = pass.getAsBuffer();
-    res.set({ 'Content-Type': 'application/vnd.apple.pkpass', 'Content-Disposition': 'attachment; filename="loyalty.pkpass"' });
+    res.set({ 'Content-Type': 'application/vnd.apple.pkpass', 'Content-Transfer-Encoding': 'binary', 'Content-Disposition': 'attachment; filename="loyalty.pkpass"' });
     res.send(buffer);
   } catch (err) { console.error('PASS ERROR FULL:', JSON.stringify({msg: err.message, stack: err.stack, name: err.name})); res.status(500).json({ error: err.message }); }
 });
