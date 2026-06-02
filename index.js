@@ -23,6 +23,10 @@ const db = admin.firestore();
 
 // الشهادات
 function getCert(envVar, filePath) {
+  const secretPath = '/etc/secrets/' + path.basename(filePath);
+  if (fs.existsSync(secretPath)) {
+    return fs.readFileSync(secretPath, 'utf8');
+  }
   if (process.env[envVar]) {
     return Buffer.from(process.env[envVar], 'base64').toString('utf8');
   }
