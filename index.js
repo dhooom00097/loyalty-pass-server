@@ -93,6 +93,7 @@ app.post('/api/scan-by-code', async (req, res) => {
     if (newStamps >= STAMPS_REQUIRED) { newStamps = 0; giftEarned = true; totalGifts += 1; }
     await customerRef.update({ stamps: newStamps, totalGifts, lastVisit: admin.firestore.FieldValue.serverTimestamp() });
     res.json({ success: true, name: customer.name, stamps: newStamps, stampsRequired: STAMPS_REQUIRED, giftEarned, totalGifts });
+    if (customer.pushToken) sendPushToApple(customer.pushToken).catch(console.error);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
