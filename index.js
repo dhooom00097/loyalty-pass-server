@@ -152,3 +152,12 @@ app.get('/api/customer/:customerId', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`✅ السيرفر شغال على http://localhost:${PORT}`));
+
+app.get('/api/debug-certs', (req, res) => {
+  try {
+    const wwdr = getCert('WWDR_BASE64', 'wwdr.pem').toString().substring(0, 30);
+    const cert = getCert('SIGNER_CERT_BASE64', 'signerCert.pem').toString().substring(0, 30);
+    const key = getCert('SIGNER_KEY_BASE64', 'signerKey.pem').toString().substring(0, 30);
+    res.json({ wwdr, cert, key });
+  } catch(e) { res.json({ error: e.message }); }
+});
