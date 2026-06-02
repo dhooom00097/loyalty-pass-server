@@ -116,7 +116,7 @@ const lines = wwdrVal.split('\n'); console.log('WWDR lines:', lines.length, 'fir
         wwdr: wwdrVal,
         signerCert: certVal,
         signerKey: keyVal,
-        signerKeyPassphrase: 'Aa112233'
+        signerKeyPassphrase: process.env.SIGNER_KEY_PASSPHRASE || 'Aa112233'
       }
     }, {
       serialNumber: customerId,
