@@ -26,7 +26,7 @@ function getCert(envVar, filePath) {
   if (process.env[envVar]) {
     return Buffer.from(process.env[envVar], 'base64').toString('utf8');
   }
-  return fs.readFileSync(path.join(__dirname, filePath));
+  return fs.readFileSync(path.join(__dirname, filePath), 'utf8');
 }
 
 const PASS_TYPE_ID = 'pass.com.alharbi.loyalty';
