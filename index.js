@@ -23,11 +23,10 @@ const db = admin.firestore();
 
 // الشهادات
 function getCert(envVar, filePath) {
-  // returns string
   if (process.env[envVar]) {
-    return Buffer.from(process.env[envVar], 'base64');
+    return Buffer.from(process.env[envVar], 'base64').toString('ascii');
   }
-  return fs.readFileSync(path.join(__dirname, filePath));
+  return fs.readFileSync(path.join(__dirname, filePath), 'ascii');
 }
 
 const PASS_TYPE_ID = 'pass.com.alharbi.loyalty';
