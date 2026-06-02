@@ -131,7 +131,7 @@ const lines = wwdrVal.split('\n'); console.log('WWDR lines:', lines.length, 'fir
       labelColor: 'rgb(245, 196, 122)',
       logoText: merchantName,
       webServiceURL: process.env.SERVICE_URL || 'https://loyalty-pass-server.onrender.com',
-      authenticationToken: customer.authToken || 'loyalty2024secure'
+      authenticationToken: 'loyalty2024secure'
     });
 
     pass.primaryFields.push({ key: 'balance', label: 'الختمات', value: stampsText });
