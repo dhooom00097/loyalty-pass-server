@@ -179,6 +179,7 @@ app.get('/api/debug-certs', (req, res) => {
 
 // تسجيل جهاز العميل
 app.post('/v1/devices/:deviceId/registrations/:passType/:serial', async (req, res) => {
+  console.log('DEVICE REGISTER:', req.params, req.body, req.headers.authorization);
   try {
     const { deviceId, serial } = req.params;
     const { pushToken } = req.body;
