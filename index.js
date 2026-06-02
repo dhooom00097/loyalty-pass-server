@@ -11,8 +11,23 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-admin.initializeApp({ credential: admin.credential.cert(require('./firebase-key.json')) });
+// Firebase - يقرأ من Environment Variable أو من الملف
+let firebaseConfig;
+if (process.env.FIREBASE_KEY_BASE64) {
+  firebaseConfig = JSON.parse(Buffer.from(process.env.FIREBASE_KEY_BASE64, 'base64').toString());
+} else {
+  firebaseConfig = require('./firebase-key.json');
+}
+admin.initializeApp({ credential: admin.credential.cert(firebaseConfig) });
 const db = admin.firestore();
+
+// الشهادات
+function getCert(envVar, filePath) {
+  if (process.env[envVar]) {
+    return Buffer.from(process.env[envVar], 'base64');
+  }
+  return fs.readFileSync(path.join(__dirname, filePath));
+}
 
 const PASS_TYPE_ID = 'pass.com.alharbi.loyalty';
 const TEAM_ID = 'VGKLVKKXX6';
@@ -91,9 +106,9 @@ app.get('/api/pass/:customerId', async (req, res) => {
     const pass = await PKPass.from({
       model: path.join(__dirname, 'pass-model.pass'),
       certificates: {
-        wwdr: fs.readFileSync(path.join(__dirname, 'wwdr.pem')),
-        signerCert: fs.readFileSync(path.join(__dirname, 'signerCert.pem')),
-        signerKey: fs.readFileSync(path.join(__dirname, 'signerKey.pem')),
+        wwdr: getCert('WWDR_BASE64', 'wwdr.pem'),
+        signerCert: getCert('SIGNER_CERT_BASE64', 'signerCert.pem'),
+        signerKey: getCert('SIGNER_KEY_BASE64', 'signerKey.pem'),
         signerKeyPassphrase: 'Aa112233'
       }
     }, {
