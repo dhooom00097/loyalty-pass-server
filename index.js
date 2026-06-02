@@ -106,7 +106,8 @@ app.get('/api/pass/:customerId', async (req, res) => {
     const wwdrVal = getCert('WWDR_BASE64', 'wwdr.pem');
     const certVal = getCert('SIGNER_CERT_BASE64', 'signerCert.pem');
     const keyVal = getCert('SIGNER_KEY_BASE64', 'signerKey.pem');
-    console.log('WWDR type:', typeof wwdrVal, wwdrVal.toString().substring(0,28));
+    console.log('WWDR type:', typeof wwdrVal, JSON.stringify(wwdrVal.substring(0,50)));
+const lines = wwdrVal.split('\n'); console.log('WWDR lines:', lines.length, 'first:', lines[0], 'last:', lines[lines.length-1]);
     console.log('CERT type:', typeof certVal, certVal.toString().substring(0,28));
     console.log('KEY type:', typeof keyVal, keyVal.toString().substring(0,28));
     const pass = await PKPass.from({
