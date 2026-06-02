@@ -147,8 +147,7 @@ app.get('/api/customer/:customerId', async (req, res) => {
     const doc = await db.collection('customers').doc(req.params.customerId).get();
     if (!doc.exists) return res.status(404).json({ error: 'غير موجود' });
     res.json(doc.data());
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
+} catch (err) { console.error('PASS ERROR:', err); res.status(500).json({ error: err.message, stack: err.stack }); }});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`✅ السيرفر شغال على http://localhost:${PORT}`));
