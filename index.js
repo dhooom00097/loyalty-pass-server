@@ -137,7 +137,7 @@ app.get('/api/pass/:customerId', async (req, res) => {
     const buffer = pass.getAsBuffer();
     res.set({ 'Content-Type': 'application/vnd.apple.pkpass', 'Content-Disposition': 'attachment; filename="loyalty.pkpass"' });
     res.send(buffer);
-  } catch (err) { console.error("PASS ERROR:", err.message); res.status(500).json({ error: err.message }); }
+  } catch (err) { console.error('PASS ERROR FULL:', JSON.stringify({msg: err.message, stack: err.stack, name: err.name})); res.status(500).json({ error: err.message }); }
 });
 
 app.post('/api/merchant/register', async (req, res) => {
