@@ -23,6 +23,7 @@ const db = admin.firestore();
 
 // الشهادات
 function getCert(envVar, filePath) {
+  // returns string
   if (process.env[envVar]) {
     return Buffer.from(process.env[envVar], 'base64');
   }
