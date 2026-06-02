@@ -1,0 +1,7 @@
+node_modules/
+firebase-key.json
+pass-cert.p12
+signerCert.pem
+signerKey.pem
+wwdr.pem
+*.pkpass

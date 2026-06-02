@@ -1,0 +1,16 @@
+{
+  "formatVersion": 1,
+  "passTypeIdentifier": "pass.com.alharbi.loyalty",
+  "serialNumber": "template",
+  "teamIdentifier": "VGKLVKKXX6",
+  "organizationName": "بطاقة الولاء",
+  "description": "بطاقة الولاء",
+  "backgroundColor": "rgb(133, 17, 9)",
+  "foregroundColor": "rgb(245, 196, 122)",
+  "labelColor": "rgb(245, 196, 122)",
+  "logoText": "بطاقة الولاء",
+  "storeCard": {},
+  "barcodes": [
+    { "message": "template", "format": "PKBarcodeFormatQR", "messageEncoding": "iso-8859-1" }
+  ]
+}

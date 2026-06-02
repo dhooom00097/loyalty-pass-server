@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بطاقة الولاء</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  background: #0a0a0a;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.card {
+  background: #1a1a1a;
+  border-radius: 24px;
+  padding: 40px 32px;
+  width: 100%;
+  max-width: 380px;
+  border: 1px solid #2a2a2a;
+}
+.logo {
+  font-size: 28px;
+  font-weight: 700;
+  color: #F5C47A;
+  text-align: center;
+  margin-bottom: 8px;
+}
+.subtitle {
+  font-size: 14px;
+  color: #666;
+  text-align: center;
+  margin-bottom: 40px;
+}
+.field {
+  margin-bottom: 20px;
+}
+label {
+  display: block;
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 8px;
+}
+input {
+  width: 100%;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 16px;
+  color: #fff;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+input:focus { border-color: #F5C47A; }
+input::placeholder { color: #444; }
+.btn {
+  width: 100%;
+  background: #851109;
+  color: #F5C47A;
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  font-family: inherit;
+  transition: opacity 0.2s;
+}
+.btn:active { opacity: 0.8; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.wallet-btn {
+  width: 100%;
+  margin-top: 24px;
+  display: none;
+}
+.wallet-btn img {
+  width: 100%;
+  border-radius: 12px;
+}
+.msg {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 14px;
+  color: #888;
+  min-height: 20px;
+}
+.msg.success { color: #4CAF50; }
+.msg.error { color: #f44336; }
+.stamps {
+  display: none;
+  margin-top: 28px;
+  background: #851109;
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+}
+.stamps-title { font-size: 13px; color: #F5C47A; opacity: 0.8; margin-bottom: 12px; }
+.cups { display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; }
+.cup { font-size: 28px; }
+.cup.empty { opacity: 0.25; }
+.stamps-text { font-size: 13px; color: #F5C47A; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">☕ بطاقة الولاء</div>
+  <div class="subtitle">سجّل واحصل على هديتك</div>
+
+  <div id="form-section">
+    <div class="field">
+      <label>الاسم</label>
+      <input type="text" id="name" placeholder="عبدالرحمن" />
+    </div>
+    <div class="field">
+      <label>رقم الجوال</label>
+      <input type="tel" id="phone" placeholder="05xxxxxxxx" />
+    </div>
+    <input type="hidden" id="merchantId" value="3960032c-3848-460f-8d0a-39bb10ed8b91" />
+    <button class="btn" onclick="register()">احصل على بطاقتك</button>
+  </div>
+
+  <div class="stamps" id="stamps-section">
+    <div class="stamps-title">تقدمك نحو الهدية</div>
+    <div class="cups" id="cups-row"></div>
+    <div class="stamps-text" id="stamps-text"></div>
+  </div>
+
+  <a class="wallet-btn" id="wallet-btn" href="#">
+<button style="width:100%;background:#000;color:#fff;border:none;border-radius:12px;padding:16px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;">🏦 إضافة إلى Apple Wallet</button>  </a>
+
+  <div class="msg" id="msg"></div>
+</div>
+
+<script>
+const BASE = '';
+
+async function register() {
+  const name = document.getElementById('name').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const merchantId = document.getElementById('merchantId').value;
+
+  if (!name || !phone) {
+    showMsg('الرجاء إدخال الاسم ورقم الجوال', 'error');
+    return;
+  }
+
+  showMsg('جاري التسجيل...', '');
+  const btn = document.querySelector('.btn');
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone, merchantId })
+    });
+    const data = await res.json();
+
+    if (data.customerId) {
+      showMsg(data.exists ? 'مرحباً بعودتك! 👋' : 'تم التسجيل بنجاح! 🎉', 'success');
+      showStamps(data.stamps || 0, 4);
+      showWalletBtn(data.customerId);
+    } else {
+      showMsg('حدث خطأ، حاول مرة أخرى', 'error');
+      btn.disabled = false;
+    }
+  } catch(e) {
+    showMsg('خطأ في الاتصال', 'error');
+    btn.disabled = false;
+  }
+}
+
+function showStamps(stamps, total) {
+  const section = document.getElementById('stamps-section');
+  const cupsRow = document.getElementById('cups-row');
+  const stampsText = document.getElementById('stamps-text');
+  section.style.display = 'block';
+  cupsRow.innerHTML = '';
+  for (let i = 0; i < total; i++) {
+    const cup = document.createElement('span');
+    cup.className = 'cup' + (i < stamps ? '' : ' empty');
+    cup.textContent = '☕';
+    cupsRow.appendChild(cup);
+  }
+  const remaining = total - stamps;
+  stampsText.textContent = remaining > 0 ? `باقي ${remaining} زيارة للهدية` : '🎁 مبروك! حصلت على هديتك';
+}
+
+function showWalletBtn(customerId) {
+  const btn = document.getElementById('wallet-btn');
+  btn.href = `/api/pass/${customerId}`;
+  btn.style.display = 'block';
+}
+
+function showMsg(text, type) {
+  const el = document.getElementById('msg');
+  el.textContent = text;
+  el.className = 'msg ' + type;
+}
+
+document.getElementById('phone').addEventListener('keypress', e => {
+  if (e.key === 'Enter') register();
+});
+</script>
+</body>
+</html>

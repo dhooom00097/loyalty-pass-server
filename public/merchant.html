@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة التاجر</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, sans-serif; background: #0a0a0a; color: #fff; min-height: 100vh; }
+.header { background: #851109; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
+.header-title { font-size: 20px; font-weight: 700; color: #F5C47A; }
+.header-sub { font-size: 13px; color: #F5C47A; opacity: 0.7; margin-top: 2px; }
+.content { padding: 24px; }
+.input-wrap { background: #1a1a1a; border-radius: 20px; padding: 24px; border: 1px solid #2a2a2a; margin-bottom: 20px; }
+.input-label { font-size: 13px; color: #888; margin-bottom: 12px; text-align: center; }
+.code-input { width: 100%; background: #111; border: 2px solid #333; border-radius: 14px; padding: 18px; font-size: 28px; font-weight: 700; color: #F5C47A; text-align: center; outline: none; font-family: inherit; letter-spacing: 4px; }
+.code-input:focus { border-color: #851109; }
+.stamp-btn { width: 100%; background: #851109; color: #F5C47A; border: none; border-radius: 14px; padding: 18px; font-size: 18px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 14px; transition: opacity 0.2s; }
+.stamp-btn:active { opacity: 0.8; }
+.stamp-btn:disabled { opacity: 0.4; }
+.result-card { display: none; background: #1a1a1a; border-radius: 20px; padding: 24px; border: 1px solid #2a2a2a; margin-bottom: 20px; text-align: center; }
+.result-name { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+.result-sub { font-size: 14px; color: #4CAF50; margin-bottom: 20px; }
+.cups { display: flex; gap: 8px; justify-content: center; margin-bottom: 12px; flex-wrap: wrap; }
+.cup { font-size: 34px; }
+.cup.empty { opacity: 0.2; filter: grayscale(1); }
+.result-text { font-size: 15px; color: #F5C47A; margin-top: 8px; }
+.gift-banner { display: none; background: #1a4a1a; border: 1px solid #2a6a2a; border-radius: 20px; padding: 32px 24px; text-align: center; margin-bottom: 20px; }
+.gift-icon { font-size: 56px; margin-bottom: 12px; }
+.gift-text { font-size: 22px; font-weight: 700; color: #4CAF50; margin-bottom: 6px; }
+.gift-sub { font-size: 15px; color: #aaa; }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.stat { background: #1a1a1a; border-radius: 14px; padding: 18px; border: 1px solid #2a2a2a; text-align: center; }
+.stat-num { font-size: 32px; font-weight: 700; color: #F5C47A; }
+.stat-lbl { font-size: 12px; color: #666; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <div class="header-title">☕ حدق الشاي</div>
+    <div class="header-sub">لوحة التاجر</div>
+  </div>
+  <div style="font-size:13px;color:#F5C47A;opacity:0.7;" id="time"></div>
+</div>
+
+<div class="content">
+  <div class="input-wrap">
+    <div class="input-label">أدخل رقم بطاقة العميل من الـ Wallet</div>
+    <input class="code-input" id="code-input" type="tel" placeholder="00000000" />
+    <button class="stamp-btn" id="stamp-btn" onclick="doStamp()">✓ إضافة ختمة</button>
+  </div>
+
+  <div class="gift-banner" id="gift-banner">
+    <div class="gift-icon">🎁</div>
+    <div class="gift-text">مبروك! هدية مجانية</div>
+    <div class="gift-sub" id="gift-name"></div>
+  </div>
+
+  <div class="result-card" id="result-card">
+    <div class="result-name" id="res-name"></div>
+    <div class="result-sub">✓ تم إضافة ختمة</div>
+    <div class="cups" id="res-cups"></div>
+    <div class="result-text" id="res-text"></div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-num" id="stat-scans">0</div><div class="stat-lbl">ختمات اليوم</div></div>
+    <div class="stat"><div class="stat-num" id="stat-gifts">0</div><div class="stat-lbl">هدايا اليوم</div></div>
+  </div>
+</div>
+
+<script>
+const MERCHANT_ID = '3960032c-3848-460f-8d0a-39bb10ed8b91';
+let scansToday = 0;
+let giftsToday = 0;
+
+function updateTime() {
+  document.getElementById('time').textContent = new Date().toLocaleTimeString('ar-SA');
+}
+setInterval(updateTime, 1000);
+updateTime();
+
+document.getElementById('code-input').addEventListener('keypress', e => {
+  if (e.key === 'Enter') doStamp();
+});
+
+async function doStamp() {
+  const code = document.getElementById('code-input').value.trim();
+  if (!code) { alert('أدخل رقم البطاقة'); return; }
+
+  const btn = document.getElementById('stamp-btn');
+  btn.disabled = true;
+  btn.textContent = 'جاري...';
+
+  try {
+    const res = await fetch('/api/scan-by-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: code, merchantId: MERCHANT_ID })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      scansToday++;
+      document.getElementById('stat-scans').textContent = scansToday;
+      document.getElementById('code-input').value = '';
+
+      if (data.giftEarned) {
+        giftsToday++;
+        document.getElementById('stat-gifts').textContent = giftsToday;
+        document.getElementById('gift-banner').style.display = 'block';
+        document.getElementById('gift-name').textContent = data.name + ' حصل على هدية مجانية! 🎉';
+        document.getElementById('result-card').style.display = 'none';
+        setTimeout(() => document.getElementById('gift-banner').style.display = 'none', 5000);
+      } else {
+        document.getElementById('gift-banner').style.display = 'none';
+        showResult(data);
+      }
+    } else {
+      alert(data.error || 'رقم غير صحيح');
+    }
+  } catch(e) {
+    alert('خطأ في الاتصال');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '✓ إضافة ختمة';
+}
+
+function showResult(data) {
+  document.getElementById('result-card').style.display = 'block';
+  document.getElementById('res-name').textContent = data.name;
+  const cups = document.getElementById('res-cups');
+  cups.innerHTML = '';
+  for (let i = 0; i < data.stampsRequired; i++) {
+    const c = document.createElement('span');
+    c.className = 'cup' + (i < data.stamps ? '' : ' empty');
+    c.textContent = '☕';
+    cups.appendChild(c);
+  }
+  document.getElementById('res-text').textContent = `باقي ${data.stampsRequired - data.stamps} زيارة للهدية`;
+}
+</script>
+</body>
+</html>
