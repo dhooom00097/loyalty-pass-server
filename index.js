@@ -104,12 +104,18 @@ app.get('/api/pass/:customerId', async (req, res) => {
     const stampsText = `${customer.stamps} من ${STAMPS_REQUIRED}`;
     const remaining = STAMPS_REQUIRED - customer.stamps;
 
+    const wwdrVal = getCert('WWDR_BASE64', 'wwdr.pem');
+    const certVal = getCert('SIGNER_CERT_BASE64', 'signerCert.pem');
+    const keyVal = getCert('SIGNER_KEY_BASE64', 'signerKey.pem');
+    console.log('WWDR type:', typeof wwdrVal, wwdrVal.toString().substring(0,28));
+    console.log('CERT type:', typeof certVal, certVal.toString().substring(0,28));
+    console.log('KEY type:', typeof keyVal, keyVal.toString().substring(0,28));
     const pass = await PKPass.from({
       model: path.join(__dirname, 'pass-model.pass'),
       certificates: {
-        wwdr: getCert('WWDR_BASE64', 'wwdr.pem'),
-        signerCert: getCert('SIGNER_CERT_BASE64', 'signerCert.pem'),
-        signerKey: getCert('SIGNER_KEY_BASE64', 'signerKey.pem'),
+        wwdr: wwdrVal,
+        signerCert: certVal,
+        signerKey: keyVal,
         signerKeyPassphrase: 'Aa112233'
       }
     }, {
