@@ -285,3 +285,9 @@ async function sendPushToApple(pushToken) {
     console.error('Push setup error:', err.message);
   }
 }
+
+// Apple Wallet log endpoint
+app.post('/v1/log', (req, res) => {
+  console.log('Apple Wallet Log:', JSON.stringify(req.body));
+  res.status(200).send();
+});
