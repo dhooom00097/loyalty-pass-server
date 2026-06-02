@@ -75,6 +75,7 @@ app.post('/api/scan', async (req, res) => {
     if (newStamps >= STAMPS_REQUIRED) { newStamps = 0; giftEarned = true; totalGifts += 1; }
     await customerRef.update({ stamps: newStamps, totalGifts, lastVisit: admin.firestore.FieldValue.serverTimestamp() });
     res.json({ success: true, name: customer.name, stamps: newStamps, stampsRequired: STAMPS_REQUIRED, giftEarned, totalGifts });
+    if (customer.pushToken) sendPushToApple(customer.pushToken).catch(console.error);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -128,7 +129,9 @@ const lines = wwdrVal.split('\n'); console.log('WWDR lines:', lines.length, 'fir
       backgroundColor: merchantColor,
       foregroundColor: 'rgb(245, 196, 122)',
       labelColor: 'rgb(245, 196, 122)',
-      logoText: merchantName
+      logoText: merchantName,
+      webServiceURL: process.env.SERVICE_URL || 'https://loyalty-pass-server.onrender.com',
+      authenticationToken: customer.authToken || 'loyalty2024'
     });
 
     pass.primaryFields.push({ key: 'balance', label: 'الختمات', value: stampsText });
@@ -171,3 +174,114 @@ app.get('/api/debug-certs', (req, res) => {
     res.json({ wwdr, cert, key });
   } catch(e) { res.json({ error: e.message }); }
 });
+
+// ===== Apple Wallet Push Notification Endpoints =====
+
+// تسجيل جهاز العميل
+app.post('/v1/devices/:deviceId/registrations/:passType/:serial', async (req, res) => {
+  try {
+    const { deviceId, serial } = req.params;
+    const { pushToken } = req.body;
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('ApplePass ')) {
+      return res.status(401).send();
+    }
+
+    await db.collection('devices').doc(deviceId).set({
+      deviceId,
+      pushToken,
+      serial,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+
+    await db.collection('customers').doc(serial).update({
+      deviceId,
+      pushToken,
+      authToken: 'loyalty2024'
+    });
+
+    res.status(201).send();
+  } catch (err) {
+    console.error('Register device error:', err.message);
+    res.status(500).send();
+  }
+});
+
+// إرجاع الـ pass المحدث
+app.get('/v1/passes/:passType/:serial', async (req, res) => {
+  try {
+    const { serial } = req.params;
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('ApplePass ')) {
+      return res.status(401).send();
+    }
+
+    res.redirect(`/api/pass/${serial}`);
+  } catch (err) {
+    res.status(500).send();
+  }
+});
+
+// حذف تسجيل الجهاز
+app.delete('/v1/devices/:deviceId/registrations/:passType/:serial', async (req, res) => {
+  try {
+    const { deviceId } = req.params;
+    await db.collection('devices').doc(deviceId).delete();
+    res.status(200).send();
+  } catch (err) {
+    res.status(500).send();
+  }
+});
+
+// قائمة الـ passes المحدثة
+app.get('/v1/devices/:deviceId/registrations/:passType', async (req, res) => {
+  try {
+    const { deviceId } = req.params;
+    const deviceDoc = await db.collection('devices').doc(deviceId).get();
+    if (!deviceDoc.exists) return res.status(404).send();
+    const { serial } = deviceDoc.data();
+    res.json({ serialNumbers: [serial], lastUpdated: new Date().toISOString() });
+  } catch (err) {
+    res.status(500).send();
+  }
+});
+
+// ===== إرسال Push Notification لـ Apple =====
+async function sendPushToApple(pushToken) {
+  try {
+    const http2 = require('http2');
+    const cert = getCert('SIGNER_CERT_BASE64', 'signerCert.pem');
+    const key = getCert('SIGNER_KEY_BASE64', 'signerKey.pem');
+
+    const client = http2.connect('https://api.push.apple.com', { cert, key });
+
+    return new Promise((resolve, reject) => {
+      const req = client.request({
+        ':method': 'POST',
+        ':path': `/3/device/${pushToken}`,
+        'apns-topic': 'pass.com.alharbi.loyalty',
+        'apns-push-type': 'background',
+        'content-type': 'application/json'
+      });
+
+      req.write(JSON.stringify({}));
+      req.end();
+
+      req.on('response', (headers) => {
+        console.log('Push sent, status:', headers[':status']);
+        client.close();
+        resolve();
+      });
+
+      req.on('error', (err) => {
+        console.error('Push error:', err.message);
+        client.close();
+        reject(err);
+      });
+    });
+  } catch (err) {
+    console.error('Push setup error:', err.message);
+  }
+}
