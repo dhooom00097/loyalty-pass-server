@@ -190,7 +190,7 @@ async function loadMerchants() {
   const base = window.location.origin;
   list.innerHTML = merchants.map(function(m) {
     return '<div class="table-row">' +
-      '<div><div class="merchant-name">' + m.name + '</div><div class="merchant-phone">' + (m.phone || '') + '</div><div class="merchant-link">' + base + '/merchant/' + m.merchantId + '</div><div class="merchant-link" style="color:#4CAF50;">📋 ' + base + '/register/' + m.merchantId + '</div></div>' +
+      '<div><div class="merchant-name">' + m.name + '</div><div class="merchant-phone">' + (m.phone || '') + '</div><div class="merchant-link">' + base + '/merchant/' + m.merchantId + '</div></div>' +
       '<div>' + (m.customersCount || 0) + '</div>' +
       '<div>' + (m.stampsRequired || 4) + ' ختمة</div>' +
       '<div class="price-tag">' + (m.subscriptionPrice || 0) + ' ر.س</div>' +
