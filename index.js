@@ -69,6 +69,8 @@ app.post('/api/scan', async (req, res) => {
     if (!customerDoc.exists) return res.status(404).json({ error: 'العميل غير موجود' });
     const customer = customerDoc.data();
     if (customer.merchantId !== merchantId) return res.status(403).json({ error: 'هذه البطاقة لتاجر آخر' });
+    const merchantCheck = await db.collection('merchants').doc(merchantId).get();
+    if (!merchantCheck.exists || !merchantCheck.data().active) return res.status(403).json({ error: 'الاشتراك غير فعال' });
     let newStamps = customer.stamps + 1;
     let giftEarned = false;
     let totalGifts = customer.totalGifts || 0;
@@ -292,4 +294,110 @@ async function sendPushToApple(pushToken) {
 app.post('/v1/log', (req, res) => {
   console.log('Apple Wallet Log:', JSON.stringify(req.body));
   res.status(200).send();
+});
+
+// ===== ADMIN PANEL =====
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+
+const ADMIN_SECRET = process.env.ADMIN_SECRET || 'admin-super-secret-2024';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@loyalty.com';
+const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || bcrypt.hashSync('Admin@2024!', 10);
+
+// Middleware تحقق من الـ JWT
+function adminAuth(req, res, next) {
+  const auth = req.headers.authorization;
+  if (!auth || !auth.startsWith('Bearer ')) return res.status(401).json({ error: 'غير مصرح' });
+  try {
+    const decoded = jwt.verify(auth.split(' ')[1], ADMIN_SECRET);
+    req.admin = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: 'token منتهي أو غير صحيح' });
+  }
+}
+
+// تسجيل دخول Admin
+app.post('/api/admin/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (email !== ADMIN_EMAIL) return res.status(401).json({ error: 'بيانات غلط' });
+    const valid = bcrypt.compareSync(password, ADMIN_PASSWORD_HASH);
+    if (!valid) return res.status(401).json({ error: 'بيانات غلط' });
+    const token = jwt.sign({ email, role: 'admin' }, ADMIN_SECRET, { expiresIn: '24h' });
+    res.json({ token });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// إضافة تاجر جديد
+app.post('/api/admin/merchants', adminAuth, async (req, res) => {
+  try {
+    const { name, phone, color, stampsRequired, subscriptionPrice, subscriptionDate } = req.body;
+    if (!name || !phone) return res.status(400).json({ error: 'اسم ورقم الجوال مطلوبان' });
+    const merchantId = uuidv4();
+    const merchantData = {
+      merchantId,
+      name,
+      phone,
+      color: color || 'rgb(133, 17, 9)',
+      stampsRequired: stampsRequired || 4,
+      subscriptionPrice: subscriptionPrice || 0,
+      subscriptionDate: subscriptionDate || new Date().toISOString(),
+      subscriptionExpiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      active: true,
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    };
+    await db.collection('merchants').doc(merchantId).set(merchantData);
+    res.json({ merchantId, ...merchantData });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// قائمة التجار
+app.get('/api/admin/merchants', adminAuth, async (req, res) => {
+  try {
+    const snapshot = await db.collection('merchants').get();
+    const merchants = [];
+    for (const doc of snapshot.docs) {
+      const data = doc.data();
+      const customersSnap = await db.collection('customers').where('merchantId', '==', doc.id).get();
+      merchants.push({ ...data, customersCount: customersSnap.size });
+    }
+    res.json(merchants);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// تعديل تاجر
+app.put('/api/admin/merchants/:merchantId', adminAuth, async (req, res) => {
+  try {
+    const { merchantId } = req.params;
+    const updates = req.body;
+    await db.collection('merchants').doc(merchantId).update(updates);
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// تفعيل/إيقاف تاجر
+app.patch('/api/admin/merchants/:merchantId/toggle', adminAuth, async (req, res) => {
+  try {
+    const { merchantId } = req.params;
+    const doc = await db.collection('merchants').doc(merchantId).get();
+    if (!doc.exists) return res.status(404).json({ error: 'التاجر غير موجود' });
+    const newStatus = !doc.data().active;
+    await db.collection('merchants').doc(merchantId).update({ active: newStatus });
+    res.json({ active: newStatus });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// إحصائيات عامة
+app.get('/api/admin/stats', adminAuth, async (req, res) => {
+  try {
+    const merchants = await db.collection('merchants').get();
+    const customers = await db.collection('customers').get();
+    const activeMerchants = merchants.docs.filter(d => d.data().active).length;
+    res.json({
+      totalMerchants: merchants.size,
+      activeMerchants,
+      totalCustomers: customers.size
+    });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
