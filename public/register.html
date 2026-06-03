@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تسجيل بطاقة الولاء</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, sans-serif; background: #0a0a0a; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.card { background: #1a1a1a; border-radius: 24px; padding: 40px 32px; width: 100%; max-width: 380px; border: 1px solid #2a2a2a; }
+.merchant-header { text-align: center; margin-bottom: 32px; }
+.merchant-logo { width: 80px; height: 80px; border-radius: 16px; object-fit: contain; margin: 0 auto 12px; display: block; background: #111; }
+.merchant-logo-placeholder { width: 80px; height: 80px; border-radius: 16px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 36px; background: #851109; }
+.merchant-name { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.merchant-sub { font-size: 13px; color: #666; }
+.stamps-preview { display: flex; gap: 8px; justify-content: center; margin: 20px 0; }
+.stamp { width: 40px; height: 40px; border-radius: 50%; background: #2a2a2a; border: 2px solid #333; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.stamp-label { text-align: center; font-size: 12px; color: #666; margin-bottom: 28px; }
+.field { margin-bottom: 16px; }
+label { display: block; font-size: 13px; color: #888; margin-bottom: 8px; }
+input { width: 100%; background: #111; border: 1px solid #333; border-radius: 12px; padding: 14px 16px; font-size: 16px; color: #fff; outline: none; font-family: inherit; }
+input:focus { border-color: #F5C47A; }
+input::placeholder { color: #444; }
+.btn { width: 100%; border: none; border-radius: 12px; padding: 16px; font-size: 17px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 8px; }
+.btn-primary { background: #851109; color: #F5C47A; }
+.btn-wallet { background: #000; color: #fff; margin-top: 16px; display: none; }
+.msg { text-align: center; margin-top: 14px; font-size: 14px; min-height: 20px; }
+.msg.success { color: #4CAF50; }
+.msg.error { color: #f44336; }
+.stamps-section { display: none; background: #851109; border-radius: 16px; padding: 16px; margin: 16px 0; text-align: center; }
+.stamps-title { font-size: 12px; color: #F5C47A; opacity: 0.8; margin-bottom: 10px; }
+.stamps-cups { display: flex; gap: 6px; justify-content: center; margin-bottom: 8px; }
+.cup { font-size: 26px; }
+.cup.empty { opacity: 0.25; }
+.stamps-text { font-size: 12px; color: #F5C47A; }
+.loading { text-align: center; color: #666; font-size: 14px; padding: 40px; }
+.not-found { text-align: center; color: #f44336; font-size: 16px; padding: 40px; }
+</style>
+</head>
+<body>
+<div class="card" id="main-card">
+  <div class="loading" id="loading">جاري التحميل...</div>
+
+  <div id="content" style="display:none;">
+    <div class="merchant-header">
+      <div id="logo-wrap"></div>
+      <div class="merchant-name" id="merchant-name"></div>
+      <div class="merchant-sub">بطاقة الولاء</div>
+    </div>
+
+    <div class="stamps-preview" id="stamps-preview"></div>
+    <div class="stamp-label" id="stamp-label"></div>
+
+    <div id="form-section">
+      <div class="field">
+        <label>الاسم</label>
+        <input type="text" id="name" placeholder="اسمك" />
+      </div>
+      <div class="field">
+        <label>رقم الجوال</label>
+        <input type="tel" id="phone" placeholder="05xxxxxxxx" />
+      </div>
+      <button class="btn btn-primary" onclick="register()">احصل على بطاقتك</button>
+    </div>
+
+    <div class="stamps-section" id="stamps-section">
+      <div class="stamps-title">تقدمك نحو الهدية</div>
+      <div class="stamps-cups" id="stamps-cups"></div>
+      <div class="stamps-text" id="stamps-text"></div>
+    </div>
+
+    <button class="btn btn-wallet" id="wallet-btn">🏦 إضافة إلى Apple Wallet</button>
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <div class="not-found" id="not-found" style="display:none;">
+    ⚠️ المحل غير موجود
+  </div>
+</div>
+
+<script>
+var merchantId = window.location.pathname.split('/').pop();
+var merchantData = {};
+
+async function loadMerchant() {
+  try {
+    var res = await fetch('/api/merchant/' + merchantId);
+    var data = await res.json();
+    if (data.error || !data.name) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('not-found').style.display = 'block';
+      return;
+    }
+    merchantData = data;
+
+    // لوجو
+    var logoWrap = document.getElementById('logo-wrap');
+    if (data.logoUrl) {
+      logoWrap.innerHTML = '<img class="merchant-logo" src="' + data.logoUrl + '" alt="logo" />';
+    } else {
+      logoWrap.innerHTML = '<div class="merchant-logo-placeholder">☕</div>';
+    }
+
+    // اسم
+    document.getElementById('merchant-name').textContent = data.name;
+
+    // لون البطاقة
+    if (data.color) {
+      document.querySelector('.btn-primary').style.background = data.color;
+      document.querySelector('.stamps-section').style.background = data.color;
+      document.querySelector('.merchant-logo-placeholder') && (document.querySelector('.merchant-logo-placeholder').style.background = data.color);
+    }
+
+    // ختمات
+    var stamps = data.stampsRequired || 4;
+    var preview = document.getElementById('stamps-preview');
+    for (var i = 0; i < stamps; i++) {
+      preview.innerHTML += '<div class="stamp">☕</div>';
+    }
+    document.getElementById('stamp-label').textContent = 'احصل على هدية مجانية بعد ' + stamps + ' زيارات';
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('content').style.display = 'block';
+
+    // تعيين عنوان الصفحة
+    document.title = data.name + ' — بطاقة الولاء';
+  } catch(e) {
+    document.getElementById('loading').textContent = 'خطأ في التحميل';
+  }
+}
+
+async function register() {
+  var name = document.getElementById('name').value.trim();
+  var phone = document.getElementById('phone').value.trim();
+  if (!name || !phone) { showMsg('أدخل الاسم ورقم الجوال', 'error'); return; }
+  var btn = document.querySelector('.btn-primary');
+  btn.textContent = 'جاري...';
+  btn.disabled = true;
+  try {
+    var res = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name, phone: phone, merchantId: merchantId })
+    });
+    var data = await res.json();
+    if (data.customerId) {
+      showMsg(data.exists ? 'مرحباً بعودتك! 👋' : 'تم التسجيل بنجاح! ��', 'success');
+      showStamps(data.stamps || 0, merchantData.stampsRequired || 4);
+      document.getElementById('wallet-btn').style.display = 'block';
+      document.getElementById('wallet-btn').onclick = function() {
+        window.location.href = '/api/pass/' + data.customerId;
+      };
+      document.getElementById('form-section').style.display = 'none';
+    } else {
+      showMsg(data.error || 'حدث خطأ', 'error');
+      btn.textContent = 'احصل على بطاقتك';
+      btn.disabled = false;
+    }
+  } catch(e) {
+    showMsg('خطأ في الاتصال', 'error');
+    btn.textContent = 'احصل على بطاقتك';
+    btn.disabled = false;
+  }
+}
+
+function showStamps(stamps, total) {
+  var section = document.getElementById('stamps-section');
+  section.style.display = 'block';
+  var cups = document.getElementById('stamps-cups');
+  cups.innerHTML = '';
+  for (var i = 0; i < total; i++) {
+    var c = document.createElement('span');
+    c.className = 'cup' + (i < stamps ? '' : ' empty');
+    c.textContent = '☕';
+    cups.appendChild(c);
+  }
+  var remaining = total - stamps;
+  document.getElementById('stamps-text').textContent = remaining > 0 ? 'باقي ' + remaining + ' زيارة للهدية' : '🎁 مبروك! عندك هدية';
+}
+
+function showMsg(text, type) {
+  var el = document.getElementById('msg');
+  el.textContent = text;
+  el.className = 'msg ' + type;
+}
+
+document.getElementById('phone').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') register();
+});
+
+loadMerchant();
+</script>
+</body>
+</html>

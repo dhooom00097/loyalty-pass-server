@@ -298,6 +298,10 @@ app.post('/api/merchant/:merchantId/verify-pin', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+app.get('/register/:merchantId', (req, res) => {
+  res.sendFile(require('path').join(__dirname, 'public', 'register.html'));
+});
+
 app.get('/merchant/:merchantId', (req, res) => {
   res.sendFile(require('path').join(__dirname, 'public', 'merchant-dashboard.html'));
 });
