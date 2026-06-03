@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
 <title>لوحة التاجر</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -127,33 +126,11 @@ body { font-family: -apple-system, sans-serif; background: #0a0a0a; color: #fff;
       <div class="cups" id="res-cups"></div>
       <div class="result-text" id="res-text"></div>
     </div>
-    <div class="scan-mode-toggle" style="display:flex;background:#22222f;border-radius:14px;padding:4px;margin-bottom:16px;">
-    <button id="mode-camera-btn" onclick="switchMode('camera')" style="flex:1;padding:10px;text-align:center;font-size:13px;font-weight:600;color:#fff;cursor:pointer;border-radius:10px;border:none;background:linear-gradient(135deg,#6c63ff,#a855f7);font-family:inherit;">📷 كاميرا QR</button>
-    <button id="mode-manual-btn" onclick="switchMode('manual')" style="flex:1;padding:10px;text-align:center;font-size:13px;font-weight:600;color:#8888aa;cursor:pointer;border-radius:10px;border:none;background:transparent;font-family:inherit;">⌨️ يدوي</button>
-  </div>
-  <div id="camera-mode">
-    <div style="background:#1a1a24;border-radius:18px;border:1px solid rgba(255,255,255,0.08);overflow:hidden;margin-bottom:16px;">
-      <div id="camera-wrap" style="position:relative;display:none;">
-        <video id="qr-video" style="width:100%;max-height:260px;object-fit:cover;display:block;" playsinline autoplay muted></video>
-        <canvas id="qr-canvas" style="display:none;"></canvas>
-        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;">
-          <div style="width:170px;height:170px;border:3px solid #6c63ff;border-radius:16px;box-shadow:0 0 0 9999px rgba(0,0,0,0.45);"></div>
-        </div>
-      </div>
-      <div id="camera-status" style="padding:14px 16px;text-align:center;font-size:13px;color:#8888aa;">اضغط لتشغيل الكاميرا</div>
-      <div style="padding:0 16px 16px;">
-        <button id="start-camera-btn" onclick="startCamera()" style="width:100%;background:linear-gradient(135deg,#6c63ff,#a855f7);color:#fff;border:none;border-radius:14px;padding:16px;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;">📷 تشغيل الكاميرا</button>
-        <button id="stop-camera-btn" onclick="stopCamera()" style="display:none;width:100%;background:#22222f;color:#8888aa;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px;font-size:14px;cursor:pointer;font-family:inherit;margin-top:8px;">إيقاف الكاميرا</button>
-      </div>
-    </div>
-  </div>
-  <div id="manual-mode" style="display:none;">
-  <div class="scan-section">
+    <div class="scan-section">
       <div class="scan-label">أدخل رقم بطاقة العميل</div>
       <input class="code-input" id="code-input" type="tel" placeholder="0000000" />
       <button class="scan-btn" id="scan-btn">✓ إضافة ختمة</button>
     </div>
-  </div>
     <div class="recent-section">
       <div class="section-header-label">آخر العمليات</div>
       <div id="recent-list"><div class="empty-state">لا توجد عمليات بعد</div></div>
@@ -439,96 +416,6 @@ setInterval(function() {
 }, 1000);
 
 // Start
-
-var videoStream = null;
-var scannerActive = false;
-var lastScanned = '';
-var lastScannedTime = 0;
-
-function switchMode(mode) {
-  document.getElementById('mode-camera-btn').style.background = mode === 'camera' ? 'linear-gradient(135deg,#6c63ff,#a855f7)' : 'transparent';
-  document.getElementById('mode-camera-btn').style.color = mode === 'camera' ? '#fff' : '#8888aa';
-  document.getElementById('mode-manual-btn').style.background = mode === 'manual' ? 'linear-gradient(135deg,#6c63ff,#a855f7)' : 'transparent';
-  document.getElementById('mode-manual-btn').style.color = mode === 'manual' ? '#fff' : '#8888aa';
-  document.getElementById('camera-mode').style.display = mode === 'camera' ? 'block' : 'none';
-  document.getElementById('manual-mode').style.display = mode === 'manual' ? 'block' : 'none';
-  if (mode !== 'camera') stopCamera();
-}
-
-async function startCamera() {
-  try {
-    var stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-    videoStream = stream;
-    var video = document.getElementById('qr-video');
-    video.srcObject = stream;
-    document.getElementById('camera-wrap').style.display = 'block';
-    document.getElementById('start-camera-btn').style.display = 'none';
-    document.getElementById('stop-camera-btn').style.display = 'block';
-    document.getElementById('camera-status').textContent = 'وجّه على رمز QR في بطاقة العميل';
-    scannerActive = true;
-    requestAnimationFrame(scanQRFrame);
-  } catch(e) {
-    document.getElementById('camera-status').textContent = 'تعذر الوصول للكاميرا';
-  }
-}
-
-function stopCamera() {
-  scannerActive = false;
-  if (videoStream) { videoStream.getTracks().forEach(function(t) { t.stop(); }); videoStream = null; }
-  document.getElementById('camera-wrap').style.display = 'none';
-  document.getElementById('start-camera-btn').style.display = 'block';
-  document.getElementById('stop-camera-btn').style.display = 'none';
-  document.getElementById('camera-status').textContent = 'اضغط لتشغيل الكاميرا';
-}
-
-function scanQRFrame() {
-  if (!scannerActive) return;
-  var video = document.getElementById('qr-video');
-  if (video.readyState !== video.HAVE_ENOUGH_DATA) { requestAnimationFrame(scanQRFrame); return; }
-  var canvas = document.getElementById('qr-canvas');
-  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-  var ctx = canvas.getContext('2d');
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  var code = jsQR(imageData.data, imageData.width, imageData.height);
-  if (code && code.data) {
-    var now = Date.now();
-    if (code.data !== lastScanned || now - lastScannedTime > 3000) {
-      lastScanned = code.data; lastScannedTime = now;
-      document.getElementById('camera-status').textContent = 'تم المسح ✓';
-      scanByCustomerId(code.data);
-    }
-  }
-  requestAnimationFrame(scanQRFrame);
-}
-
-async function scanByCustomerId(customerId) {
-  var res = await fetch('/api/scan', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ customerId: customerId, merchantId: merchantId })
-  });
-  var data = await res.json();
-  if (data.success) {
-    scansToday++;
-    document.getElementById('stat-today').textContent = scansToday;
-    addRecent(data.name, data.stamps, data.stampsRequired, data.giftEarned);
-    if (data.giftEarned) {
-      document.getElementById('gift-banner').style.display = 'block';
-      document.getElementById('gift-name').textContent = data.name + ' حصل على هدية! 🎉';
-      document.getElementById('result-card').style.display = 'none';
-      document.getElementById('camera-status').textContent = '🎁 ' + data.name + ' — وجّه على بطاقة أخرى';
-      setTimeout(function() { document.getElementById('gift-banner').style.display = 'none'; document.getElementById('camera-status').textContent = 'وجّه على رمز QR في بطاقة العميل'; }, 4000);
-    } else {
-      document.getElementById('gift-banner').style.display = 'none';
-      showResult(data);
-      setTimeout(function() { document.getElementById('camera-status').textContent = 'وجّه على رمز QR في بطاقة العميل'; }, 3000);
-    }
-  } else {
-    document.getElementById('camera-status').textContent = '⚠️ ' + (data.error || 'خطأ');
-    setTimeout(function() { document.getElementById('camera-status').textContent = 'وجّه على رمز QR في بطاقة العميل'; }, 3000);
-  }
-}
-
 checkPin();
 </script>
 </body>
