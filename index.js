@@ -161,12 +161,41 @@ app.post('/api/merchant/register', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+app.get('/api/merchant/:merchantId', async (req, res) => {
+  try {
+    const doc = await db.collection('merchants').doc(req.params.merchantId).get();
+    if (!doc.exists) return res.status(404).json({ error: 'غير موجود' });
+    const data = doc.data();
+    const customersSnap = await db.collection('customers').where('merchantId', '==', req.params.merchantId).get();
+    const stampsToday = customersSnap.docs.filter(d => {
+      const last = d.data().lastVisit;
+      if (!last) return false;
+      const today = new Date();
+      const visit = last.toDate();
+      return visit.toDateString() === today.toDateString();
+    }).length;
+    res.json({ ...data, customersCount: customersSnap.size, stampsToday });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.put('/api/merchant/:merchantId', async (req, res) => {
+  try {
+    const { name, color, stampsRequired } = req.body;
+    await db.collection('merchants').doc(req.params.merchantId).update({ name, color, stampsRequired });
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 app.get('/api/customer/:customerId', async (req, res) => {
   try {
     const doc = await db.collection('customers').doc(req.params.customerId).get();
     if (!doc.exists) return res.status(404).json({ error: 'غير موجود' });
     res.json(doc.data());
 } catch (err) { console.error('PASS ERROR:', err); res.status(500).json({ error: err.message, stack: err.stack }); }});
+
+app.get('/merchant/:merchantId', (req, res) => {
+  res.sendFile(require('path').join(__dirname, 'public', 'merchant-dashboard.html'));
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`✅ السيرفر شغال على http://localhost:${PORT}`));

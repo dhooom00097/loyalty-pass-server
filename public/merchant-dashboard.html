@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>لوحة التاجر</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, sans-serif; background: #0a0a0a; color: #fff; min-height: 100vh; }
+.header { background: #851109; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
+.header-name { font-size: 18px; font-weight: 700; color: #F5C47A; }
+.header-sub { font-size: 12px; color: #F5C47A; opacity: 0.7; margin-top: 2px; }
+.settings-btn { background: rgba(255,255,255,0.15); border: none; color: #F5C47A; width: 36px; height: 36px; border-radius: 50%; font-size: 18px; cursor: pointer; }
+.content { padding: 20px; }
+.stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.stat { background: #1a1a1a; border-radius: 14px; padding: 14px; border: 1px solid #2a2a2a; text-align: center; }
+.stat-num { font-size: 24px; font-weight: 700; color: #F5C47A; }
+.stat-lbl { font-size: 11px; color: #666; margin-top: 4px; }
+.scan-section { background: #1a1a1a; border-radius: 16px; padding: 20px; border: 1px solid #2a2a2a; margin-bottom: 20px; }
+.scan-label { font-size: 13px; color: #888; margin-bottom: 10px; text-align: center; }
+.code-input { width: 100%; background: #111; border: 2px solid #333; border-radius: 12px; padding: 16px; font-size: 26px; font-weight: 700; color: #F5C47A; text-align: center; outline: none; font-family: inherit; letter-spacing: 3px; }
+.code-input:focus { border-color: #851109; }
+.scan-btn { width: 100%; background: #851109; color: #F5C47A; border: none; border-radius: 12px; padding: 16px; font-size: 17px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 12px; }
+.scan-btn:disabled { opacity: 0.4; }
+.result-card { display: none; background: #1a1a1a; border-radius: 16px; padding: 20px; border: 1px solid #2a2a2a; margin-bottom: 20px; text-align: center; }
+.result-name { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+.result-sub { font-size: 13px; color: #4CAF50; margin-bottom: 16px; }
+.cups { display: flex; gap: 6px; justify-content: center; margin-bottom: 10px; flex-wrap: wrap; }
+.cup { font-size: 30px; }
+.cup.empty { opacity: 0.2; filter: grayscale(1); }
+.result-text { font-size: 14px; color: #F5C47A; }
+.gift-banner { display: none; background: #1a4a1a; border: 1px solid #2a6a2a; border-radius: 16px; padding: 28px 20px; text-align: center; margin-bottom: 20px; }
+.gift-icon { font-size: 52px; margin-bottom: 10px; }
+.gift-text { font-size: 20px; font-weight: 700; color: #4CAF50; }
+.recent-section { background: #1a1a1a; border-radius: 16px; border: 1px solid #2a2a2a; overflow: hidden; margin-bottom: 20px; }
+.recent-header { padding: 14px 18px; font-size: 14px; font-weight: 600; border-bottom: 1px solid #2a2a2a; color: #888; }
+.recent-item { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid #1f1f1f; }
+.recent-avatar { width: 36px; height: 36px; border-radius: 50%; background: #851109; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #F5C47A; flex-shrink: 0; }
+.recent-name { font-size: 14px; font-weight: 500; }
+.recent-stamps { font-size: 12px; color: #888; margin-top: 2px; }
+.recent-time { font-size: 11px; color: #555; margin-right: auto; }
+
+/* Settings Modal */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; align-items: flex-end; justify-content: center; }
+.modal-overlay.show { display: flex; }
+.modal { background: #1a1a1a; border-radius: 20px 20px 0 0; padding: 28px 20px 40px; width: 100%; max-width: 500px; border-top: 1px solid #2a2a2a; }
+.modal-title { font-size: 17px; font-weight: 700; margin-bottom: 20px; color: #F5C47A; text-align: center; }
+.field { margin-bottom: 16px; }
+label { display: block; font-size: 13px; color: #888; margin-bottom: 8px; }
+input[type=text], input[type=number] { width: 100%; background: #111; border: 1px solid #333; border-radius: 10px; padding: 12px 14px; font-size: 15px; color: #fff; outline: none; font-family: inherit; }
+input:focus { border-color: #F5C47A; }
+.color-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.color-opt { width: 36px; height: 36px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; }
+.color-opt.selected { border-color: #F5C47A; }
+.save-btn { width: 100%; background: #851109; color: #F5C47A; border: none; border-radius: 12px; padding: 14px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 8px; }
+.cancel-btn { width: 100%; background: #2a2a2a; color: #888; border: none; border-radius: 12px; padding: 12px; font-size: 15px; cursor: pointer; font-family: inherit; margin-top: 8px; }
+.inactive-banner { background: #4a1a1a; border: 1px solid #6a2a2a; border-radius: 12px; padding: 16px; text-align: center; margin-bottom: 20px; color: #f44336; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-name" id="merchant-name">جاري التحميل...</div>
+    <div class="header-sub" id="merchant-sub">لوحة التاجر</div>
+  </div>
+  <button class="settings-btn" onclick="showSettings()">⚙️</button>
+</div>
+
+<div class="content">
+  <div id="inactive-banner" class="inactive-banner" style="display:none;">⚠️ الاشتراك غير فعّال — تواصل مع الإدارة</div>
+
+  <div class="stats-row">
+    <div class="stat"><div class="stat-num" id="stat-customers">0</div><div class="stat-lbl">عميل</div></div>
+    <div class="stat"><div class="stat-num" id="stat-today">0</div><div class="stat-lbl">اليوم</div></div>
+    <div class="stat"><div class="stat-num" id="stat-stamps">0</div><div class="stat-lbl">ختمة للهدية</div></div>
+  </div>
+
+  <div class="gift-banner" id="gift-banner">
+    <div class="gift-icon">🎁</div>
+    <div class="gift-text" id="gift-name">مبروك! هدية مجانية</div>
+  </div>
+
+  <div class="result-card" id="result-card">
+    <div class="result-name" id="res-name"></div>
+    <div class="result-sub">✓ تم إضافة ختمة</div>
+    <div class="cups" id="res-cups"></div>
+    <div class="result-text" id="res-text"></div>
+  </div>
+
+  <div class="scan-section">
+    <div class="scan-label">أدخل رقم بطاقة العميل من الـ Wallet</div>
+    <input class="code-input" id="code-input" type="tel" placeholder="0000000" />
+    <button class="scan-btn" id="scan-btn" onclick="doScan()">✓ إضافة ختمة</button>
+  </div>
+
+  <div class="recent-section">
+    <div class="recent-header">آخر العمليات</div>
+    <div id="recent-list"></div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal">
+    <div class="modal-title">⚙️ إعدادات المحل</div>
+    <div class="field"><label>اسم المحل</label><input type="text" id="s-name" /></div>
+    <div class="field">
+      <label>لون البطاقة</label>
+      <div class="color-row" id="color-row">
+        <div class="color-opt" style="background:#851109" data-color="rgb(133, 17, 9)" onclick="selectColor(this)"></div>
+        <div class="color-opt" style="background:#0a3d62" data-color="rgb(10, 61, 98)" onclick="selectColor(this)"></div>
+        <div class="color-opt" style="background:#1a4a1a" data-color="rgb(26, 74, 26)" onclick="selectColor(this)"></div>
+        <div class="color-opt" style="background:#4a1a4a" data-color="rgb(74, 26, 74)" onclick="selectColor(this)"></div>
+        <div class="color-opt" style="background:#1a1a4a" data-color="rgb(26, 26, 74)" onclick="selectColor(this)"></div>
+        <div class="color-opt" style="background:#4a3000" data-color="rgb(74, 48, 0)" onclick="selectColor(this)"></div>
+      </div>
+    </div>
+    <div class="field"><label>عدد الختمات للهدية</label><input type="number" id="s-stamps" min="1" max="20" /></div>
+    <button class="save-btn" onclick="saveSettings()">حفظ التغييرات</button>
+    <button class="cancel-btn" onclick="hideSettings()">إلغاء</button>
+  </div>
+</div>
+
+<script>
+const merchantId = window.location.pathname.split('/').pop();
+let merchantData = {};
+let recentOps = [];
+let scansToday = 0;
+let giftsToday = 0;
+let selectedColor = 'rgb(133, 17, 9)';
+
+async function loadMerchant() {
+  try {
+    const res = await fetch(`/api/merchant/${merchantId}`);
+    const data = await res.json();
+    if (data.error) { document.getElementById('merchant-name').textContent = 'غير موجود'; return; }
+    merchantData = data;
+    document.getElementById('merchant-name').textContent = data.name;
+    document.getElementById('stat-customers').textContent = data.customersCount || 0;
+    document.getElementById('stat-today').textContent = data.stampsToday || 0;
+    document.getElementById('stat-stamps').textContent = data.stampsRequired || 4;
+    if (!data.active) {
+      document.getElementById('inactive-banner').style.display = 'block';
+      document.getElementById('scan-btn').disabled = true;
+    }
+    updateTime();
+  } catch(e) { console.error(e); }
+}
+
+function updateTime() {
+  document.getElementById('merchant-sub').textContent = new Date().toLocaleTimeString('ar-SA');
+}
+setInterval(updateTime, 1000);
+
+async function doScan() {
+  const code = document.getElementById('code-input').value.trim();
+  if (!code) { alert('أدخل رقم البطاقة'); return; }
+  const btn = document.getElementById('scan-btn');
+  btn.disabled = true;
+  btn.textContent = 'جاري...';
+  try {
+    const res = await fetch('/api/scan-by-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, merchantId })
+    });
+    const data = await res.json();
+    if (data.success) {
+      scansToday++;
+      document.getElementById('stat-today').textContent = scansToday;
+      document.getElementById('code-input').value = '';
+      addRecent(data.name, data.stamps, data.stampsRequired, data.giftEarned);
+      if (data.giftEarned) {
+        giftsToday++;
+        document.getElementById('gift-banner').style.display = 'block';
+        document.getElementById('gift-name').textContent = data.name + ' حصل على هدية! 🎉';
+        document.getElementById('result-card').style.display = 'none';
+        setTimeout(() => document.getElementById('gift-banner').style.display = 'none', 5000);
+      } else {
+        document.getElementById('gift-banner').style.display = 'none';
+        showResult(data);
+      }
+    } else {
+      alert(data.error || 'رقم غير صحيح');
+    }
+  } catch(e) { alert('خطأ في الاتصال'); }
+  btn.disabled = false;
+  btn.textContent = '✓ إضافة ختمة';
+}
+
+function showResult(data) {
+  const card = document.getElementById('result-card');
+  card.style.display = 'block';
+  document.getElementById('res-name').textContent = data.name;
+  const cups = document.getElementById('res-cups');
+  cups.innerHTML = '';
+  for (let i = 0; i < data.stampsRequired; i++) {
+    const c = document.createElement('span');
+    c.className = 'cup' + (i < data.stamps ? '' : ' empty');
+    c.textContent = '☕';
+    cups.appendChild(c);
+  }
+  document.getElementById('res-text').textContent = `باقي ${data.stampsRequired - data.stamps} زيارة للهدية`;
+}
+
+function addRecent(name, stamps, total, gift) {
+  recentOps.unshift({ name, stamps, total, gift, time: new Date() });
+  if (recentOps.length > 10) recentOps.pop();
+  renderRecent();
+}
+
+function renderRecent() {
+  const list = document.getElementById('recent-list');
+  if (recentOps.length === 0) { list.innerHTML = '<div style="padding:16px;text-align:center;color:#555;font-size:13px;">لا توجد عمليات بعد</div>'; return; }
+  list.innerHTML = recentOps.map(op => `
+    <div class="recent-item">
+      <div class="recent-avatar">${op.name[0]}</div>
+      <div>
+        <div class="recent-name">${op.name}</div>
+        <div class="recent-stamps">${op.gift ? '🎁 حصل على هدية' : op.stamps + ' من ' + op.total + ' ختمة'}</div>
+      </div>
+      <div class="recent-time">${op.time.toLocaleTimeString('ar-SA', {hour:'2-digit', minute:'2-digit'})}</div>
+    </div>
+  `).join('');
+}
+
+function showSettings() {
+  document.getElementById('s-name').value = merchantData.name || '';
+  document.getElementById('s-stamps').value = merchantData.stampsRequired || 4;
+  selectedColor = merchantData.color || 'rgb(133, 17, 9)';
+  document.querySelectorAll('.color-opt').forEach(el => {
+    el.classList.toggle('selected', el.dataset.color === selectedColor);
+  });
+  document.getElementById('settings-modal').classList.add('show');
+}
+
+function hideSettings() {
+  document.getElementById('settings-modal').classList.remove('show');
+}
+
+function selectColor(el) {
+  document.querySelectorAll('.color-opt').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedColor = el.dataset.color;
+}
+
+async function saveSettings() {
+  const name = document.getElementById('s-name').value.trim();
+  const stampsRequired = parseInt(document.getElementById('s-stamps').value);
+  if (!name) { alert('أدخل اسم المحل'); return; }
+  try {
+    const res = await fetch(`/api/merchant/${merchantId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, color: selectedColor, stampsRequired })
+    });
+    const data = await res.json();
+    if (data.success) {
+      hideSettings();
+      loadMerchant();
+      alert('تم حفظ التغييرات ✓');
+    }
+  } catch(e) { alert('خطأ في الحفظ'); }
+}
+
+document.getElementById('code-input').addEventListener('keypress', e => {
+  if (e.key === 'Enter') doScan();
+});
+
+renderRecent();
+loadMerchant();
+</script>
+</body>
+</html>
