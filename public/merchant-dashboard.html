@@ -7,10 +7,21 @@
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, sans-serif; background: #0a0a0a; color: #fff; min-height: 100vh; }
+#pin-screen { position: fixed; inset: 0; background: #0a0a0a; z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.pin-card { background: #1a1a1a; border-radius: 24px; padding: 40px 32px; width: 100%; max-width: 360px; border: 1px solid #2a2a2a; text-align: center; }
+.pin-icon { font-size: 40px; margin-bottom: 16px; }
+.pin-title { font-size: 20px; font-weight: 700; color: #F5C47A; margin-bottom: 8px; }
+.pin-sub { font-size: 13px; color: #666; margin-bottom: 32px; }
+.pin-input { width: 100%; background: #111; border: 2px solid #333; border-radius: 14px; padding: 18px; font-size: 32px; color: #F5C47A; text-align: center; outline: none; font-family: inherit; letter-spacing: 8px; margin-bottom: 16px; }
+.pin-input:focus { border-color: #851109; }
+.pin-btn { width: 100%; background: #851109; color: #F5C47A; border: none; border-radius: 14px; padding: 16px; font-size: 17px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.pin-error { color: #f44336; font-size: 13px; margin-top: 12px; min-height: 20px; }
+#main-app { display: none; }
 .header { background: #851109; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
 .header-name { font-size: 18px; font-weight: 700; color: #F5C47A; }
 .header-sub { font-size: 12px; color: #F5C47A; opacity: 0.7; margin-top: 2px; }
-.settings-btn { background: rgba(255,255,255,0.15); border: none; color: #F5C47A; width: 36px; height: 36px; border-radius: 50%; font-size: 18px; cursor: pointer; }
+.header-btns { display: flex; gap: 8px; }
+.icon-btn { background: rgba(255,255,255,0.15); border: none; color: #F5C47A; width: 36px; height: 36px; border-radius: 50%; font-size: 16px; cursor: pointer; }
 .tabs { display: flex; background: #111; border-bottom: 1px solid #2a2a2a; }
 .tab { flex: 1; padding: 12px; text-align: center; font-size: 13px; color: #666; cursor: pointer; border-bottom: 2px solid transparent; }
 .tab.active { color: #F5C47A; border-bottom-color: #F5C47A; }
@@ -26,7 +37,6 @@ body { font-family: -apple-system, sans-serif; background: #0a0a0a; color: #fff;
 .code-input:focus { border-color: #851109; }
 .scan-btn { width: 100%; background: #851109; color: #F5C47A; border: none; border-radius: 12px; padding: 16px; font-size: 17px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 12px; }
 .redeem-btn { width: 100%; background: #1a4a1a; color: #4CAF50; border: 1px solid #2a6a2a; border-radius: 12px; padding: 16px; font-size: 17px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 10px; }
-.scan-btn:disabled, .redeem-btn:disabled { opacity: 0.4; }
 .result-card { display: none; background: #1a1a1a; border-radius: 16px; padding: 20px; border: 1px solid #2a2a2a; margin-bottom: 16px; text-align: center; }
 .result-name { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
 .result-sub { font-size: 13px; color: #4CAF50; margin-bottom: 16px; }
@@ -38,154 +48,216 @@ body { font-family: -apple-system, sans-serif; background: #0a0a0a; color: #fff;
 .gift-icon { font-size: 52px; margin-bottom: 10px; }
 .gift-text { font-size: 20px; font-weight: 700; color: #4CAF50; }
 .redeem-banner { display: none; background: #4a3800; border: 1px solid #6a5200; border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 16px; }
-.redeem-text { font-size: 18px; font-weight: 700; color: #F5C47A; }
-.redeem-sub { font-size: 13px; color: #888; margin-top: 6px; }
 .recent-section { background: #1a1a1a; border-radius: 16px; border: 1px solid #2a2a2a; overflow: hidden; }
-.recent-header { padding: 14px 18px; font-size: 14px; font-weight: 600; border-bottom: 1px solid #2a2a2a; color: #888; }
+.section-header-label { padding: 14px 18px; font-size: 14px; font-weight: 600; border-bottom: 1px solid #2a2a2a; color: #888; }
 .recent-item { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid #1f1f1f; }
-.recent-avatar { width: 36px; height: 36px; border-radius: 50%; background: #851109; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #F5C47A; flex-shrink: 0; }
-.recent-name { font-size: 14px; font-weight: 500; }
-.recent-stamps { font-size: 12px; color: #888; margin-top: 2px; }
-.recent-time { font-size: 11px; color: #555; margin-right: auto; }
+.avatar { width: 36px; height: 36px; border-radius: 50%; background: #851109; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #F5C47A; flex-shrink: 0; }
+.item-name { font-size: 14px; font-weight: 500; }
+.item-sub { font-size: 12px; color: #888; margin-top: 2px; }
+.item-time { font-size: 11px; color: #555; margin-right: auto; }
 .customers-list { background: #1a1a1a; border-radius: 16px; border: 1px solid #2a2a2a; overflow: hidden; }
 .customer-item { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid #1f1f1f; }
-.customer-avatar { width: 40px; height: 40px; border-radius: 50%; background: #851109; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; color: #F5C47A; flex-shrink: 0; }
-.customer-name { font-size: 15px; font-weight: 500; }
-.customer-info { font-size: 12px; color: #666; margin-top: 2px; }
 .customer-badges { display: flex; gap: 6px; margin-right: auto; flex-direction: column; align-items: flex-end; }
-.badge-stamps { background: #2a2a2a; color: #F5C47A; padding: 3px 8px; border-radius: 999px; font-size: 11px; }
-.badge-gifts { background: #1a4a1a; color: #4CAF50; padding: 3px 8px; border-radius: 999px; font-size: 11px; }
+.badge { padding: 3px 8px; border-radius: 999px; font-size: 11px; }
+.badge-stamps { background: #2a2a2a; color: #F5C47A; }
+.badge-gifts { background: #1a4a1a; color: #4CAF50; }
 .search-input { width: 100%; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 12px 16px; font-size: 14px; color: #fff; outline: none; font-family: inherit; margin-bottom: 12px; }
-.search-input::placeholder { color: #444; }
 .inactive-banner { background: #4a1a1a; border: 1px solid #6a2a2a; border-radius: 12px; padding: 14px; text-align: center; margin-bottom: 16px; color: #f44336; font-weight: 600; font-size: 14px; }
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; align-items: flex-end; justify-content: center; }
+.empty-state { padding: 32px; text-align: center; color: #444; font-size: 14px; }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 300; align-items: flex-end; justify-content: center; }
 .modal-overlay.show { display: flex; }
 .modal { background: #1a1a1a; border-radius: 20px 20px 0 0; padding: 28px 20px 40px; width: 100%; max-width: 500px; border-top: 1px solid #2a2a2a; }
 .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 20px; color: #F5C47A; text-align: center; }
 .field { margin-bottom: 16px; }
-label { display: block; font-size: 13px; color: #888; margin-bottom: 8px; }
-input[type=text], input[type=number] { width: 100%; background: #111; border: 1px solid #333; border-radius: 10px; padding: 12px 14px; font-size: 15px; color: #fff; outline: none; font-family: inherit; }
-.color-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.field label { display: block; font-size: 13px; color: #888; margin-bottom: 8px; }
+.field input { width: 100%; background: #111; border: 1px solid #333; border-radius: 10px; padding: 12px 14px; font-size: 15px; color: #fff; outline: none; font-family: inherit; }
+.color-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
 .color-opt { width: 36px; height: 36px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; }
 .color-opt.selected { border-color: #F5C47A; }
 .save-btn { width: 100%; background: #851109; color: #F5C47A; border: none; border-radius: 12px; padding: 14px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 8px; }
 .cancel-btn { width: 100%; background: #2a2a2a; color: #888; border: none; border-radius: 12px; padding: 12px; font-size: 15px; cursor: pointer; font-family: inherit; margin-top: 8px; }
-.empty-state { padding: 32px; text-align: center; color: #444; font-size: 14px; }
 </style>
 </head>
 <body>
 
-<div id="pin-screen" style="position:fixed;inset:0;background:#0a0a0a;z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;"><div style="background:#1a1a1a;border-radius:24px;padding:40px 32px;width:100%;max-width:360px;border:1px solid #2a2a2a;text-align:center;"><div style="font-size:40px;margin-bottom:16px;">🔐</div><div style="font-size:20px;font-weight:700;color:#F5C47A;margin-bottom:8px;" id="pin-merchant-name">لوحة التاجر</div><div style="font-size:13px;color:#666;margin-bottom:32px;">أدخل الـ PIN للدخول</div><input type="tel" id="pin-input" maxlength="4" placeholder="••••" style="width:100%;background:#111;border:2px solid #333;border-radius:14px;padding:18px;font-size:32px;color:#F5C47A;text-align:center;outline:none;font-family:inherit;letter-spacing:8px;margin-bottom:16px;" /><button id="verify-btn" style="width:100%;background:#851109;color:#F5C47A;border:none;border-radius:14px;padding:16px;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;">دخول</button><div id="pin-error" style="color:#f44336;font-size:13px;margin-top:12px;"></div></div></div><div class="header" id="main-content" style="display:none;">
-  <div>
-    <div class="header-name" id="merchant-name">جاري التحميل...</div>
-    <div class="header-sub" id="merchant-time">لوحة التاجر</div>
-  </div>
-  <button class="settings-btn" onclick="showSettings()">⚙️</button>
-</div>
-
-<div class="tabs">
-  <div class="tab active" onclick="switchTab('scan')">📷 السكان</div>
-  <div class="tab" onclick="switchTab('customers')">👥 العملاء</div>
-  <div class="tab" onclick="switchTab('redeem')">🎁 استرداد</div>
-</div>
-
-<!-- تبويب السكان -->
-<div class="tab-content active" id="tab-scan">
-  <div id="inactive-banner" class="inactive-banner" style="display:none;">⚠️ الاشتراك غير فعّال</div>
-  <div class="stats-row">
-    <div class="stat"><div class="stat-num" id="stat-customers">0</div><div class="stat-lbl">عميل</div></div>
-    <div class="stat"><div class="stat-num" id="stat-today">0</div><div class="stat-lbl">اليوم</div></div>
-    <div class="stat"><div class="stat-num" id="stat-stamps">0</div><div class="stat-lbl">ختمة للهدية</div></div>
-  </div>
-  <div class="gift-banner" id="gift-banner">
-    <div class="gift-icon">🎁</div>
-    <div class="gift-text" id="gift-name">مبروك! هدية مجانية</div>
-  </div>
-  <div class="result-card" id="result-card">
-    <div class="result-name" id="res-name"></div>
-    <div class="result-sub">✓ تم إضافة ختمة</div>
-    <div class="cups" id="res-cups"></div>
-    <div class="result-text" id="res-text"></div>
-  </div>
-  <div class="scan-section">
-    <div class="scan-label">أدخل رقم بطاقة العميل</div>
-    <input class="code-input" id="code-input" type="tel" placeholder="0000000" />
-    <button class="scan-btn" id="scan-btn" onclick="doScan()">✓ إضافة ختمة</button>
-  </div>
-  <div class="recent-section">
-    <div class="recent-header">آخر العمليات</div>
-    <div id="recent-list"><div class="empty-state">لا توجد عمليات بعد</div></div>
+<div id="pin-screen">
+  <div class="pin-card">
+    <div class="pin-icon">🔐</div>
+    <div class="pin-title" id="pin-title">لوحة التاجر</div>
+    <div class="pin-sub">أدخل الـ PIN للدخول</div>
+    <input class="pin-input" type="tel" id="pin-input" maxlength="4" placeholder="••••" />
+    <button class="pin-btn" id="pin-btn">دخول</button>
+    <div class="pin-error" id="pin-error"></div>
   </div>
 </div>
 
-<!-- تبويب العملاء -->
-<div class="tab-content" id="tab-customers">
-  <input class="search-input" id="search-input" type="text" placeholder="🔍 ابحث عن عميل..." oninput="filterCustomers()" />
-  <div class="customers-list" id="customers-list">
-    <div class="empty-state">جاري التحميل...</div>
+<div id="main-app">
+  <div class="header">
+    <div>
+      <div class="header-name" id="merchant-name">جاري التحميل...</div>
+      <div class="header-sub" id="merchant-time">لوحة التاجر</div>
+    </div>
+    <div class="header-btns">
+      <button class="icon-btn" id="settings-btn">⚙️</button>
+      <button class="icon-btn" id="logout-btn">🚪</button>
+    </div>
   </div>
-</div>
 
-<!-- تبويب الاسترداد -->
-<div class="tab-content" id="tab-redeem">
-  <div class="redeem-banner" id="redeem-banner">
-    <div class="redeem-text" id="redeem-text"></div>
-    <div class="redeem-sub" id="redeem-sub"></div>
+  <div class="tabs">
+    <div class="tab active" data-tab="scan">📷 السكان</div>
+    <div class="tab" data-tab="customers">👥 العملاء</div>
+    <div class="tab" data-tab="redeem">🎁 استرداد</div>
   </div>
-  <div class="scan-section">
-    <div class="scan-label">أدخل رقم البطاقة لاسترداد هدية</div>
-    <input class="code-input" id="redeem-input" type="tel" placeholder="0000000" />
-    <button class="redeem-btn" id="redeem-btn" onclick="doRedeem()">🎁 استرداد هدية</button>
+
+  <div class="tab-content active" id="tab-scan">
+    <div id="inactive-banner" class="inactive-banner" style="display:none;">⚠️ الاشتراك غير فعّال</div>
+    <div class="stats-row">
+      <div class="stat"><div class="stat-num" id="stat-customers">0</div><div class="stat-lbl">عميل</div></div>
+      <div class="stat"><div class="stat-num" id="stat-today">0</div><div class="stat-lbl">اليوم</div></div>
+      <div class="stat"><div class="stat-num" id="stat-stamps">0</div><div class="stat-lbl">ختمة للهدية</div></div>
+    </div>
+    <div class="gift-banner" id="gift-banner">
+      <div class="gift-icon">🎁</div>
+      <div class="gift-text" id="gift-name">مبروك!</div>
+    </div>
+    <div class="result-card" id="result-card">
+      <div class="result-name" id="res-name"></div>
+      <div class="result-sub">✓ تم إضافة ختمة</div>
+      <div class="cups" id="res-cups"></div>
+      <div class="result-text" id="res-text"></div>
+    </div>
+    <div class="scan-section">
+      <div class="scan-label">أدخل رقم بطاقة العميل</div>
+      <input class="code-input" id="code-input" type="tel" placeholder="0000000" />
+      <button class="scan-btn" id="scan-btn">✓ إضافة ختمة</button>
+    </div>
+    <div class="recent-section">
+      <div class="section-header-label">آخر العمليات</div>
+      <div id="recent-list"><div class="empty-state">لا توجد عمليات بعد</div></div>
+    </div>
   </div>
-  <div style="background:#1a1a1a;border-radius:14px;padding:16px;border:1px solid #2a2a2a;margin-top:4px;">
-    <div style="font-size:13px;color:#666;line-height:1.8;">
-      <div>• العميل يحصل على هدية بعد <span id="info-stamps" style="color:#F5C47A;">4</span> ختمات</div>
-      <div>• الهدايا تُضاف تلقائياً عند اكتمال الختمات</div>
-      <div>• استرداد الهدية ينقص من رصيد العميل</div>
+
+  <div class="tab-content" id="tab-customers">
+    <input class="search-input" id="search-input" type="text" placeholder="🔍 ابحث عن عميل..." />
+    <div class="customers-list" id="customers-list">
+      <div class="empty-state">جاري التحميل...</div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab-redeem">
+    <div class="redeem-banner" id="redeem-banner">
+      <div style="font-size:18px;font-weight:700;color:#F5C47A;" id="redeem-text"></div>
+      <div style="font-size:13px;color:#888;margin-top:6px;" id="redeem-sub"></div>
+    </div>
+    <div class="scan-section">
+      <div class="scan-label">أدخل رقم البطاقة لاسترداد هدية</div>
+      <input class="code-input" id="redeem-input" type="tel" placeholder="0000000" />
+      <button class="redeem-btn" id="redeem-btn">🎁 استرداد هدية</button>
     </div>
   </div>
 </div>
 
-<!-- Settings Modal -->
 <div class="modal-overlay" id="settings-modal">
   <div class="modal">
     <div class="modal-title">⚙️ إعدادات المحل</div>
     <div class="field"><label>اسم المحل</label><input type="text" id="s-name" /></div>
     <div class="field">
       <label>لون البطاقة</label>
-      <div class="color-row" id="color-row">
-        <div class="color-opt" style="background:#851109" data-color="rgb(133, 17, 9)" onclick="selectColor(this)"></div>
-        <div class="color-opt" style="background:#0a3d62" data-color="rgb(10, 61, 98)" onclick="selectColor(this)"></div>
-        <div class="color-opt" style="background:#1a4a1a" data-color="rgb(26, 74, 26)" onclick="selectColor(this)"></div>
-        <div class="color-opt" style="background:#4a1a4a" data-color="rgb(74, 26, 74)" onclick="selectColor(this)"></div>
-        <div class="color-opt" style="background:#1a1a4a" data-color="rgb(26, 26, 74)" onclick="selectColor(this)"></div>
-        <div class="color-opt" style="background:#4a3000" data-color="rgb(74, 48, 0)" onclick="selectColor(this)"></div>
+      <div class="color-row">
+        <div class="color-opt selected" style="background:#851109" data-color="rgb(133, 17, 9)"></div>
+        <div class="color-opt" style="background:#0a3d62" data-color="rgb(10, 61, 98)"></div>
+        <div class="color-opt" style="background:#1a4a1a" data-color="rgb(26, 74, 26)"></div>
+        <div class="color-opt" style="background:#4a1a4a" data-color="rgb(74, 26, 74)"></div>
+        <div class="color-opt" style="background:#1a1a4a" data-color="rgb(26, 26, 74)"></div>
+        <div class="color-opt" style="background:#4a3000" data-color="rgb(74, 48, 0)"></div>
       </div>
     </div>
     <div class="field"><label>عدد الختمات للهدية</label><input type="number" id="s-stamps" min="1" max="20" /></div>
-    <button class="save-btn" onclick="saveSettings()">حفظ التغييرات</button>
-    <button class="cancel-btn" onclick="hideSettings()">إلغاء</button>
+    <button class="save-btn" id="save-settings-btn">حفظ التغييرات</button>
+    <button class="cancel-btn" id="cancel-settings-btn">إلغاء</button>
   </div>
 </div>
 
 <script>
-const merchantId = window.location.pathname.split('/').pop();
-let merchantData = {};
-let allCustomers = [];
-let recentOps = [];
-let scansToday = 0;
-let selectedColor = 'rgb(133, 17, 9)';
+var merchantId = window.location.pathname.split('/').pop();
+var merchantData = {};
+var allCustomers = [];
+var recentOps = [];
+var scansToday = 0;
+var selectedColor = 'rgb(133, 17, 9)';
 
+// PIN
+document.getElementById('pin-btn').addEventListener('click', verifyPin);
+document.getElementById('pin-input').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') verifyPin();
+});
+
+async function checkPin() {
+  var saved = localStorage.getItem('pin_' + merchantId);
+  if (saved) {
+    showApp();
+  } else {
+    var res = await fetch('/api/merchant/' + merchantId);
+    var data = await res.json();
+    if (data.name) document.getElementById('pin-title').textContent = data.name;
+  }
+}
+
+async function verifyPin() {
+  var pin = document.getElementById('pin-input').value.trim();
+  if (pin.length < 4) { document.getElementById('pin-error').textContent = 'أدخل 4 أرقام'; return; }
+  var res = await fetch('/api/merchant/' + merchantId + '/verify-pin', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pin: pin })
+  });
+  var data = await res.json();
+  if (data.success) {
+    localStorage.setItem('pin_' + merchantId, pin);
+    showApp();
+  } else {
+    document.getElementById('pin-error').textContent = data.error || 'PIN غير صحيح';
+    document.getElementById('pin-input').value = '';
+  }
+}
+
+function showApp() {
+  document.getElementById('pin-screen').style.display = 'none';
+  document.getElementById('main-app').style.display = 'block';
+  loadMerchant();
+}
+
+// Logout
+document.getElementById('logout-btn').addEventListener('click', function() {
+  localStorage.removeItem('pin_' + merchantId);
+  document.getElementById('main-app').style.display = 'none';
+  document.getElementById('pin-screen').style.display = 'flex';
+  document.getElementById('pin-input').value = '';
+  document.getElementById('pin-error').textContent = '';
+});
+
+// Tabs
+document.querySelectorAll('.tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    var name = this.dataset.tab;
+    document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+    this.classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
+    if (name === 'customers') loadCustomers();
+  });
+});
+
+// Merchant data
 async function loadMerchant() {
-  const res = await fetch(`/api/merchant/${merchantId}`);
-  const data = await res.json();
+  var res = await fetch('/api/merchant/' + merchantId);
+  var data = await res.json();
   if (data.error) return;
   merchantData = data;
   document.getElementById('merchant-name').textContent = data.name;
   document.getElementById('stat-customers').textContent = data.customersCount || 0;
   document.getElementById('stat-today').textContent = data.stampsToday || 0;
   document.getElementById('stat-stamps').textContent = data.stampsRequired || 4;
-  document.getElementById('info-stamps').textContent = data.stampsRequired || 4;
   if (!data.active) {
     document.getElementById('inactive-banner').style.display = 'block';
     document.getElementById('scan-btn').disabled = true;
@@ -193,66 +265,34 @@ async function loadMerchant() {
   }
 }
 
-async function loadCustomers() {
-  const res = await fetch(`/api/merchant/${merchantId}/customers`);
-  allCustomers = await res.json();
-  renderCustomers(allCustomers);
-}
-
-function renderCustomers(list) {
-  const el = document.getElementById('customers-list');
-  if (!list.length) { el.innerHTML = '<div class="empty-state">لا يوجد عملاء بعد</div>'; return; }
-  el.innerHTML = list.map(c => `
-    <div class="customer-item">
-      <div class="customer-avatar">${c.name[0]}</div>
-      <div style="flex:1">
-        <div class="customer-name">${c.name}</div>
-        <div class="customer-info">${c.phone || ''} • ${c.shortCode || ''}</div>
-        <div class="customer-info">${c.lastVisit ? 'آخر زيارة: ' + new Date(c.lastVisit).toLocaleDateString('ar-SA') : 'لم يزر بعد'}</div>
-      </div>
-      <div class="customer-badges">
-        <span class="badge-stamps">☕ ${c.stamps}/${merchantData.stampsRequired || 4}</span>
-        ${c.totalGifts > 0 ? `<span class="badge-gifts">🎁 ${c.totalGifts}</span>` : ''}
-      </div>
-    </div>
-  `).join('');
-}
-
-function filterCustomers() {
-  const q = document.getElementById('search-input').value.toLowerCase();
-  const filtered = allCustomers.filter(c => c.name.includes(q) || (c.phone && c.phone.includes(q)) || (c.shortCode && c.shortCode.includes(q)));
-  renderCustomers(filtered);
-}
-
-function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['scan','customers','redeem'][i] === tab));
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab-' + tab).classList.add('active');
-  if (tab === 'customers') loadCustomers();
-}
+// Scan
+document.getElementById('scan-btn').addEventListener('click', doScan);
+document.getElementById('code-input').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') doScan();
+});
 
 async function doScan() {
-  const code = document.getElementById('code-input').value.trim();
+  var code = document.getElementById('code-input').value.trim();
   if (!code) return;
-  const btn = document.getElementById('scan-btn');
+  var btn = document.getElementById('scan-btn');
   btn.disabled = true; btn.textContent = 'جاري...';
-  const res = await fetch('/api/scan-by-code', {
+  var res = await fetch('/api/scan-by-code', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code, merchantId })
+    body: JSON.stringify({ code: code, merchantId: merchantId })
   });
-  const data = await res.json();
+  var data = await res.json();
   btn.disabled = false; btn.textContent = '✓ إضافة ختمة';
   if (data.success) {
     scansToday++;
     document.getElementById('stat-today').textContent = scansToday;
     document.getElementById('code-input').value = '';
-    addRecent(data.name, data.stamps, data.stampsRequired, data.giftEarned, false);
+    addRecent(data.name, data.stamps, data.stampsRequired, data.giftEarned);
     if (data.giftEarned) {
       document.getElementById('gift-banner').style.display = 'block';
-      document.getElementById('gift-name').textContent = data.name + ' حصل على هدية! ��';
+      document.getElementById('gift-name').textContent = data.name + ' حصل على هدية! 🎉';
       document.getElementById('result-card').style.display = 'none';
-      setTimeout(() => document.getElementById('gift-banner').style.display = 'none', 5000);
+      setTimeout(function() { document.getElementById('gift-banner').style.display = 'none'; }, 5000);
     } else {
       document.getElementById('gift-banner').style.display = 'none';
       showResult(data);
@@ -260,116 +300,123 @@ async function doScan() {
   } else { alert(data.error || 'رقم غير صحيح'); }
 }
 
+function showResult(data) {
+  document.getElementById('result-card').style.display = 'block';
+  document.getElementById('res-name').textContent = data.name;
+  var cups = document.getElementById('res-cups');
+  cups.innerHTML = '';
+  for (var i = 0; i < data.stampsRequired; i++) {
+    var c = document.createElement('span');
+    c.className = 'cup' + (i < data.stamps ? '' : ' empty');
+    c.textContent = '☕';
+    cups.appendChild(c);
+  }
+  document.getElementById('res-text').textContent = 'باقي ' + (data.stampsRequired - data.stamps) + ' زيارة للهدية';
+}
+
+function addRecent(name, stamps, total, gift) {
+  recentOps.unshift({ name: name, stamps: stamps, total: total, gift: gift, time: new Date() });
+  if (recentOps.length > 10) recentOps.pop();
+  var list = document.getElementById('recent-list');
+  list.innerHTML = recentOps.map(function(op) {
+    return '<div class="recent-item"><div class="avatar">' + op.name[0] + '</div><div><div class="item-name">' + op.name + '</div><div class="item-sub">' + (op.gift ? '🎁 حصل على هدية' : op.stamps + ' من ' + op.total) + '</div></div><div class="item-time">' + op.time.toLocaleTimeString('ar-SA', {hour:'2-digit', minute:'2-digit'}) + '</div></div>';
+  }).join('');
+}
+
+// Redeem
+document.getElementById('redeem-btn').addEventListener('click', doRedeem);
+
 async function doRedeem() {
-  const code = document.getElementById('redeem-input').value.trim();
+  var code = document.getElementById('redeem-input').value.trim();
   if (!code) return;
-  const btn = document.getElementById('redeem-btn');
+  var btn = document.getElementById('redeem-btn');
   btn.disabled = true; btn.textContent = 'جاري...';
-  const res = await fetch('/api/redeem', {
+  var res = await fetch('/api/redeem', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code, merchantId })
+    body: JSON.stringify({ code: code, merchantId: merchantId })
   });
-  const data = await res.json();
-  btn.disabled = false; btn.textContent = '�� استرداد هدية';
+  var data = await res.json();
+  btn.disabled = false; btn.textContent = '🎁 استرداد هدية';
   if (data.success) {
     document.getElementById('redeem-input').value = '';
     document.getElementById('redeem-banner').style.display = 'block';
     document.getElementById('redeem-text').textContent = '✓ تم استرداد هدية ' + data.name;
     document.getElementById('redeem-sub').textContent = 'رصيد الهدايا المتبقي: ' + data.remainingGifts;
-    setTimeout(() => document.getElementById('redeem-banner').style.display = 'none', 5000);
+    setTimeout(function() { document.getElementById('redeem-banner').style.display = 'none'; }, 5000);
   } else { alert(data.error || 'خطأ'); }
 }
 
-function showResult(data) {
-  document.getElementById('result-card').style.display = 'block';
-  document.getElementById('res-name').textContent = data.name;
-  const cups = document.getElementById('res-cups');
-  cups.innerHTML = '';
-  for (let i = 0; i < data.stampsRequired; i++) {
-    const c = document.createElement('span');
-    c.className = 'cup' + (i < data.stamps ? '' : ' empty');
-    c.textContent = '☕';
-    cups.appendChild(c);
-  }
-  document.getElementById('res-text').textContent = `باقي ${data.stampsRequired - data.stamps} زيارة للهدية`;
+// Customers
+async function loadCustomers() {
+  var res = await fetch('/api/merchant/' + merchantId + '/customers');
+  allCustomers = await res.json();
+  renderCustomers(allCustomers);
 }
 
-function addRecent(name, stamps, total, gift) {
-  recentOps.unshift({ name, stamps, total, gift, time: new Date() });
-  if (recentOps.length > 10) recentOps.pop();
-  const list = document.getElementById('recent-list');
-  list.innerHTML = recentOps.map(op => `
-    <div class="recent-item">
-      <div class="recent-avatar">${op.name[0]}</div>
-      <div>
-        <div class="recent-name">${op.name}</div>
-        <div class="recent-stamps">${op.gift ? '🎁 حصل على هدية' : op.stamps + ' من ' + op.total}</div>
-      </div>
-      <div class="recent-time">${op.time.toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'})}</div>
-    </div>
-  `).join('');
+function renderCustomers(list) {
+  var el = document.getElementById('customers-list');
+  if (!list.length) { el.innerHTML = '<div class="empty-state">لا يوجد عملاء بعد</div>'; return; }
+  el.innerHTML = list.map(function(c) {
+    return '<div class="customer-item"><div class="avatar">' + c.name[0] + '</div><div style="flex:1"><div class="item-name">' + c.name + '</div><div class="item-sub">' + (c.phone||'') + ' • ' + (c.shortCode||'') + '</div><div class="item-sub">' + (c.lastVisit ? 'آخر زيارة: ' + new Date(c.lastVisit).toLocaleDateString('ar-SA') : 'لم يزر بعد') + '</div></div><div class="customer-badges"><span class="badge badge-stamps">☕ ' + c.stamps + '/' + (merchantData.stampsRequired||4) + '</span>' + (c.totalGifts > 0 ? '<span class="badge badge-gifts">🎁 ' + c.totalGifts + '</span>' : '') + '</div></div>';
+  }).join('');
 }
 
-function showSettings() {
+document.getElementById('search-input').addEventListener('input', function() {
+  var q = this.value.toLowerCase();
+  var filtered = allCustomers.filter(function(c) {
+    return c.name.includes(q) || (c.phone && c.phone.includes(q)) || (c.shortCode && c.shortCode.includes(q));
+  });
+  renderCustomers(filtered);
+});
+
+// Settings
+document.getElementById('settings-btn').addEventListener('click', function() {
   document.getElementById('s-name').value = merchantData.name || '';
   document.getElementById('s-stamps').value = merchantData.stampsRequired || 4;
   selectedColor = merchantData.color || 'rgb(133, 17, 9)';
-  document.querySelectorAll('.color-opt').forEach(el => el.classList.toggle('selected', el.dataset.color === selectedColor));
+  document.querySelectorAll('.color-opt').forEach(function(el) {
+    el.classList.toggle('selected', el.dataset.color === selectedColor);
+  });
   document.getElementById('settings-modal').classList.add('show');
-}
-function hideSettings() { document.getElementById('settings-modal').classList.remove('show'); }
-function selectColor(el) {
-  document.querySelectorAll('.color-opt').forEach(e => e.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedColor = el.dataset.color;
-}
-async function saveSettings() {
-  const name = document.getElementById('s-name').value.trim();
-  const stampsRequired = parseInt(document.getElementById('s-stamps').value);
+});
+
+document.getElementById('cancel-settings-btn').addEventListener('click', function() {
+  document.getElementById('settings-modal').classList.remove('show');
+});
+
+document.querySelectorAll('.color-opt').forEach(function(el) {
+  el.addEventListener('click', function() {
+    document.querySelectorAll('.color-opt').forEach(function(e) { e.classList.remove('selected'); });
+    el.classList.add('selected');
+    selectedColor = el.dataset.color;
+  });
+});
+
+document.getElementById('save-settings-btn').addEventListener('click', async function() {
+  var name = document.getElementById('s-name').value.trim();
+  var stampsRequired = parseInt(document.getElementById('s-stamps').value);
   if (!name) { alert('أدخل اسم المحل'); return; }
-  const res = await fetch(`/api/merchant/${merchantId}`, {
+  var res = await fetch('/api/merchant/' + merchantId, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, color: selectedColor, stampsRequired })
+    body: JSON.stringify({ name: name, color: selectedColor, stampsRequired: stampsRequired })
   });
-  const data = await res.json();
-  if (data.success) { hideSettings(); 
-async function checkPin() {
-  const saved = localStorage.getItem('merchant_pin_' + merchantId);
-  if (saved) { showDashboard(); return; }
-  document.getElementById('pin-screen').style.display = 'flex';
-  const res = await fetch('/api/merchant/' + merchantId);
-  const data = await res.json();
-  if (data.name) document.getElementById('pin-merchant-name').textContent = data.name;
-}
-async function verifyPin() {
-  const pin = document.getElementById('pin-input').value.trim();
-  if (pin.length < 4) { document.getElementById('pin-error').textContent = 'أدخل 4 أرقام'; return; }
-  const res = await fetch('/api/merchant/' + merchantId + '/verify-pin', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ pin })
-  });
-  const data = await res.json();
-  if (data.success) { localStorage.setItem('merchant_pin_' + merchantId, pin); showDashboard(); }
-  else { document.getElementById('pin-error').textContent = data.error || 'PIN غير صحيح'; document.getElementById('pin-input').value = ''; }
-}
-function showDashboard() {
-  document.getElementById('pin-screen').style.display = 'none';
-  document.getElementById('main-content').style.display = 'block';
-  document.querySelector('.tabs').style.display = 'flex';
-  loadMerchant();
-}
-document.querySelector('.tabs').style.display = 'none';
-document.getElementById("verify-btn").addEventListener("click", verifyPin);
+  var data = await res.json();
+  if (data.success) {
+    document.getElementById('settings-modal').classList.remove('show');
+    loadMerchant();
+    alert('تم الحفظ ✓');
+  }
+});
+
+// Time
+setInterval(function() {
+  document.getElementById('merchant-time').textContent = new Date().toLocaleTimeString('ar-SA');
+}, 1000);
+
+// Start
 checkPin();
- }
-}
-
-function updateTime() { document.getElementById('merchant-time').textContent = new Date().toLocaleTimeString('ar-SA'); }
-setInterval(updateTime, 1000);
-
-loadMerchant();
 </script>
 </body>
 </html>
