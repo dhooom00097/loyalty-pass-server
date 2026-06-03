@@ -139,11 +139,7 @@ app.get('/api/pass/:customerId', async (req, res) => {
     const wwdrVal = getCert('WWDR_BASE64', 'wwdr.pem');
     const certVal = getCert('SIGNER_CERT_BASE64', 'signerCert.pem');
     const keyVal = getCert('SIGNER_KEY_BASE64', 'signerKey.pem');
-    console.log('WWDR type:', typeof wwdrVal, JSON.stringify(wwdrVal.substring(0,50)));
-const lines = wwdrVal.split('\n'); console.log('WWDR lines:', lines.length, 'first:', lines[0], 'last:', lines[lines.length-1]);
-    const certLines = certVal.split('\n'); console.log('CERT lines:', certLines.length, 'first:', certLines[0]);
-    const keyLines = keyVal.split('\n'); console.log('KEY lines:', keyLines.length, 'first:', keyLines[0]);
-    // تحميل صور التاجر من Cloudinary
+    const lines = wwdrVal.split('\n');     const certLines = certVal.split('\n');     const keyLines = keyVal.split('\n');     // تحميل صور التاجر من Cloudinary
     const passModelPath = path.join(__dirname, 'pass-model.pass');
     
     async function downloadImage(url) {
@@ -171,8 +167,7 @@ const lines = wwdrVal.split('\n'); console.log('WWDR lines:', lines.length, 'fir
           const logo2x = await downloadImage(merchant.logoUrl.replace('/upload/', '/upload/w_320,h_100,c_fill/'));
           fs.writeFileSync(path.join(passModelPath, 'logo.png'), logoData);
           fs.writeFileSync(path.join(passModelPath, 'logo@2x.png'), logo2x);
-          console.log('logo loaded ok');
-        } catch(e) { console.log('logo error:', e.message); }
+                  } catch(e) { console.log('logo error:', e.message); }
       }
       if (merchant.stripUrl) {
         try {
@@ -180,8 +175,7 @@ const lines = wwdrVal.split('\n'); console.log('WWDR lines:', lines.length, 'fir
           const strip2x = await downloadImage(merchant.stripUrl.replace('/upload/', '/upload/w_750,h_288,c_fill/'));
           fs.writeFileSync(path.join(passModelPath, 'strip.png'), stripData);
           fs.writeFileSync(path.join(passModelPath, 'strip@2x.png'), strip2x);
-          console.log('strip loaded ok');
-        } catch(e) { console.log('strip error:', e.message); }
+                  } catch(e) { console.log('strip error:', e.message); }
       }
     }
 
@@ -345,8 +339,7 @@ app.get('/api/debug-certs', (req, res) => {
 
 // تسجيل جهاز العميل
 app.post('/v1/devices/:deviceId/registrations/:passType/:serial', async (req, res) => {
-  console.log('DEVICE REGISTER:', req.params, req.body, req.headers.authorization);
-  try {
+    try {
     const { deviceId, serial } = req.params;
     const { pushToken } = req.body;
     const authHeader = req.headers.authorization;
@@ -455,8 +448,7 @@ async function sendPushToApple(pushToken) {
 
 // Apple Wallet log endpoint
 app.post('/v1/log', (req, res) => {
-  console.log('Apple Wallet Log:', JSON.stringify(req.body));
-  res.status(200).send();
+    res.status(200).send();
 });
 
 
