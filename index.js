@@ -463,9 +463,9 @@ const cloudinary = require('cloudinary').v2;
 const multer = require('multer');
 
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dzvash41m',
-  api_key: process.env.CLOUDINARY_API_KEY || '321312446771719',
-  api_secret: process.env.CLOUDINARY_API_SECRET || 'v-f-vwIE1pIvmKXKiGGsktVP9KQ'
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME ,
+  api_key: process.env.CLOUDINARY_API_KEY ,
+  api_secret: process.env.CLOUDINARY_API_SECRET 
 });
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
