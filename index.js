@@ -81,6 +81,29 @@ app.post('/api/scan', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+
+// سكان بـ customerId مباشرة (من QR)
+app.post('/api/scan', async (req, res) => {
+  try {
+    const { customerId, merchantId } = req.body;
+    const mCheck = await db.collection('merchants').doc(merchantId).get();
+    if (!mCheck.exists || !mCheck.data().active) return res.status(403).json({ error: 'الاشتراك غير فعال' });
+    const customerRef = db.collection('customers').doc(customerId);
+    const customerDoc = await customerRef.get();
+    if (!customerDoc.exists) return res.status(404).json({ error: 'العميل غير موجود' });
+    const customer = customerDoc.data();
+    if (customer.merchantId !== merchantId) return res.status(403).json({ error: 'هذه البطاقة لتاجر آخر' });
+    const STAMPS_REQUIRED = mCheck.data().stampsRequired || 4;
+    let newStamps = customer.stamps + 1;
+    let giftEarned = false;
+    let totalGifts = customer.totalGifts || 0;
+    if (newStamps >= STAMPS_REQUIRED) { newStamps = 0; giftEarned = true; totalGifts++; }
+    await customerRef.update({ stamps: newStamps, totalGifts, lastVisit: admin.firestore.FieldValue.serverTimestamp() });
+    if (customer.pushToken) sendPushToApple(customer.pushToken).catch(console.error);
+    res.json({ success: true, name: customer.name, stamps: newStamps, stampsRequired: STAMPS_REQUIRED, giftEarned, totalGifts });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 app.post('/api/scan-by-code', async (req, res) => {
   try {
     const { code, merchantId } = req.body;
