@@ -173,29 +173,6 @@ body { font-family: -apple-system, sans-serif; background: #0a0a0a; color: #fff;
       </div>
     </div>
     <div class="field"><label>عدد الختمات للهدية</label><input type="number" id="s-stamps" min="1" max="20" /></div>
-    <div class="field">
-      <label>أيقونة المحل</label>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;">
-        <span class="icon-opt" data-icon="☕" style="font-size:28px;cursor:pointer;padding:8px;border-radius:8px;border:2px solid transparent;">☕</span>
-        <span class="icon-opt" data-icon="🚗" style="font-size:28px;cursor:pointer;padding:8px;border-radius:8px;border:2px solid transparent;">🚗</span>
-        <span class="icon-opt" data-icon="🍕" style="font-size:28px;cursor:pointer;padding:8px;border-radius:8px;border:2px solid transparent;">🍕</span>
-        <span class="icon-opt" data-icon="💇" style="font-size:28px;cursor:pointer;padding:8px;border-radius:8px;border:2px solid transparent;">💇</span>
-        <span class="icon-opt" data-icon="🛒" style="font-size:28px;cursor:pointer;padding:8px;border-radius:8px;border:2px solid transparent;">🛒</span>
-        <span class="icon-opt" data-icon="💊" style="font-size:28px;cursor:pointer;padding:8px;border-radius:8px;border:2px solid transparent;">💊</span>
-        <span class="icon-opt" data-icon="👗" style="font-size:28px;cursor:pointer;padding:8px;border-radius:8px;border:2px solid transparent;">👗</span>
-        <span class="icon-opt" data-icon="⭐" style="font-size:28px;cursor:pointer;padding:8px;border-radius:8px;border:2px solid transparent;">⭐</span>
-      </div>
-    </div>
-    <div class="field">
-      <label>لوجو المحل (160x50)</label>
-      <input type="file" id="logo-file" accept="image/*" style="background:#111;border:1px solid #333;border-radius:10px;padding:10px;color:#fff;width:100%;" />
-      <img id="logo-preview" style="width:100%;height:50px;object-fit:contain;margin-top:8px;display:none;background:#111;border-radius:8px;" />
-    </div>
-    <div class="field">
-      <label>صورة البطاقة (strip)</label>
-      <input type="file" id="strip-file" accept="image/*" style="background:#111;border:1px solid #333;border-radius:10px;padding:10px;color:#fff;width:100%;" />
-      <img id="strip-preview" style="width:100%;height:80px;object-fit:cover;margin-top:8px;display:none;border-radius:8px;" />
-    </div>
     <button class="save-btn" id="save-settings-btn">حفظ التغييرات</button>
     <button class="cancel-btn" id="cancel-settings-btn">إلغاء</button>
   </div>
@@ -397,11 +374,6 @@ document.getElementById('search-input').addEventListener('input', function() {
 document.getElementById('settings-btn').addEventListener('click', function() {
   document.getElementById('s-name').value = merchantData.name || '';
   document.getElementById('s-stamps').value = merchantData.stampsRequired || 4;
-  selectedIcon = merchantData.icon || '☕';
-  document.querySelectorAll('.icon-opt').forEach(function(el) {
-    if (el.dataset.icon === selectedIcon) { el.style.borderColor = '#F5C47A'; el.style.background = '#2a2a2a'; }
-    else { el.style.borderColor = 'transparent'; el.style.background = 'transparent'; }
-  });
   selectedColor = merchantData.color || 'rgb(133, 17, 9)';
   document.querySelectorAll('.color-opt').forEach(function(el) {
     el.classList.toggle('selected', el.dataset.color === selectedColor);
@@ -421,29 +393,6 @@ document.querySelectorAll('.color-opt').forEach(function(el) {
   });
 });
 
-document.getElementById('logo-file').addEventListener('change', function() {
-  if (this.files[0]) {
-    const reader = new FileReader();
-    reader.onload = e => { const img = document.getElementById('logo-preview'); img.src = e.target.result; img.style.display = 'block'; };
-    reader.readAsDataURL(this.files[0]);
-  }
-});
-document.getElementById('strip-file').addEventListener('change', function() {
-  if (this.files[0]) {
-    const reader = new FileReader();
-    reader.onload = e => { const img = document.getElementById('strip-preview'); img.src = e.target.result; img.style.display = 'block'; };
-    reader.readAsDataURL(this.files[0]);
-  }
-});
-var selectedIcon = '☕';
-document.querySelectorAll('.icon-opt').forEach(function(el) {
-  el.addEventListener('click', function() {
-    document.querySelectorAll('.icon-opt').forEach(function(e) { e.style.borderColor = 'transparent'; e.style.background = 'transparent'; });
-    el.style.borderColor = '#F5C47A';
-    el.style.background = '#2a2a2a';
-    selectedIcon = el.dataset.icon;
-  });
-});
 document.getElementById('save-settings-btn').addEventListener('click', async function() {
   var name = document.getElementById('s-name').value.trim();
   var stampsRequired = parseInt(document.getElementById('s-stamps').value);
@@ -451,19 +400,8 @@ document.getElementById('save-settings-btn').addEventListener('click', async fun
   var res = await fetch('/api/merchant/' + merchantId, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: name, color: selectedColor, stampsRequired: stampsRequired, icon: selectedIcon })
+    body: JSON.stringify({ name: name, color: selectedColor, stampsRequired: stampsRequired })
   });
-  // رفع الصور
-  var logoFile = document.getElementById('logo-file').files[0];
-  var stripFile = document.getElementById('strip-file').files[0];
-  if (logoFile) {
-    var fd = new FormData(); fd.append('image', logoFile);
-    await fetch('/api/merchant/' + merchantId + '/upload-logo', { method: 'POST', body: fd });
-  }
-  if (stripFile) {
-    var fd2 = new FormData(); fd2.append('image', stripFile);
-    await fetch('/api/merchant/' + merchantId + '/upload-strip', { method: 'POST', body: fd2 });
-  }
   var data = await res.json();
   if (data.success) {
     document.getElementById('settings-modal').classList.remove('show');
