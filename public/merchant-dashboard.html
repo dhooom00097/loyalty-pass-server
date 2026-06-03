@@ -75,7 +75,7 @@ input[type=text], input[type=number] { width: 100%; background: #111; border: 1p
 </head>
 <body>
 
-<div id="pin-screen" style="position:fixed;inset:0;background:#0a0a0a;z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;"><div style="background:#1a1a1a;border-radius:24px;padding:40px 32px;width:100%;max-width:360px;border:1px solid #2a2a2a;text-align:center;"><div style="font-size:40px;margin-bottom:16px;">🔐</div><div style="font-size:20px;font-weight:700;color:#F5C47A;margin-bottom:8px;" id="pin-merchant-name">لوحة التاجر</div><div style="font-size:13px;color:#666;margin-bottom:32px;">أدخل الـ PIN للدخول</div><input type="tel" id="pin-input" maxlength="4" placeholder="••••" style="width:100%;background:#111;border:2px solid #333;border-radius:14px;padding:18px;font-size:32px;color:#F5C47A;text-align:center;outline:none;font-family:inherit;letter-spacing:8px;margin-bottom:16px;" /><button onclick="verifyPin()" style="width:100%;background:#851109;color:#F5C47A;border:none;border-radius:14px;padding:16px;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;">دخول</button><div id="pin-error" style="color:#f44336;font-size:13px;margin-top:12px;"></div></div></div><div class="header" id="main-content" style="display:none;">
+<div id="pin-screen" style="position:fixed;inset:0;background:#0a0a0a;z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;"><div style="background:#1a1a1a;border-radius:24px;padding:40px 32px;width:100%;max-width:360px;border:1px solid #2a2a2a;text-align:center;"><div style="font-size:40px;margin-bottom:16px;">🔐</div><div style="font-size:20px;font-weight:700;color:#F5C47A;margin-bottom:8px;" id="pin-merchant-name">لوحة التاجر</div><div style="font-size:13px;color:#666;margin-bottom:32px;">أدخل الـ PIN للدخول</div><input type="tel" id="pin-input" maxlength="4" placeholder="••••" style="width:100%;background:#111;border:2px solid #333;border-radius:14px;padding:18px;font-size:32px;color:#F5C47A;text-align:center;outline:none;font-family:inherit;letter-spacing:8px;margin-bottom:16px;" /><button id="verify-btn" style="width:100%;background:#851109;color:#F5C47A;border:none;border-radius:14px;padding:16px;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;">دخول</button><div id="pin-error" style="color:#f44336;font-size:13px;margin-top:12px;"></div></div></div><div class="header" id="main-content" style="display:none;">
   <div>
     <div class="header-name" id="merchant-name">جاري التحميل...</div>
     <div class="header-sub" id="merchant-time">لوحة التاجر</div>
@@ -361,6 +361,7 @@ function showDashboard() {
   loadMerchant();
 }
 document.querySelector('.tabs').style.display = 'none';
+document.getElementById("verify-btn").addEventListener("click", verifyPin);
 checkPin();
  }
 }
