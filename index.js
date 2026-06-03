@@ -120,6 +120,60 @@ app.get('/api/pass/:customerId', async (req, res) => {
 const lines = wwdrVal.split('\n'); console.log('WWDR lines:', lines.length, 'first:', lines[0], 'last:', lines[lines.length-1]);
     const certLines = certVal.split('\n'); console.log('CERT lines:', certLines.length, 'first:', certLines[0]);
     const keyLines = keyVal.split('\n'); console.log('KEY lines:', keyLines.length, 'first:', keyLines[0]);
+    // تحميل صور التاجر إذا موجودة
+    const passModelPath = path.join(__dirname, 'pass-model.pass');
+    if (merchantDoc.exists) {
+      const merchant = merchantDoc.data();
+      if (merchant.logoUrl) {
+        try {
+          const https = require('https');
+          const logoData = await new Promise((resolve, reject) => {
+            https.get(merchant.logoUrl, (res) => {
+              const chunks = [];
+              res.on('data', c => chunks.push(c));
+              res.on('end', () => resolve(Buffer.concat(chunks)));
+              res.on('error', reject);
+            });
+          });
+          const logo2xData = await new Promise((resolve, reject) => {
+            const url2x = merchant.logoUrl.replace('/upload/', '/upload/w_320,h_100,c_fill/');
+            https.get(url2x, (res) => {
+              const chunks = [];
+              res.on('data', c => chunks.push(c));
+              res.on('end', () => resolve(Buffer.concat(chunks)));
+              res.on('error', reject);
+            });
+          });
+          fs.writeFileSync(path.join(passModelPath, 'logo.png'), logoData);
+          fs.writeFileSync(path.join(passModelPath, 'logo@2x.png'), logo2xData);
+        } catch(e) { console.log('logo load error:', e.message); }
+      }
+      if (merchant.stripUrl) {
+        try {
+          const https = require('https');
+          const stripData = await new Promise((resolve, reject) => {
+            https.get(merchant.stripUrl, (res) => {
+              const chunks = [];
+              res.on('data', c => chunks.push(c));
+              res.on('end', () => resolve(Buffer.concat(chunks)));
+              res.on('error', reject);
+            });
+          });
+          const strip2xData = await new Promise((resolve, reject) => {
+            const url2x = merchant.stripUrl.replace('/upload/', '/upload/w_750,h_288,c_fill/');
+            https.get(url2x, (res) => {
+              const chunks = [];
+              res.on('data', c => chunks.push(c));
+              res.on('end', () => resolve(Buffer.concat(chunks)));
+              res.on('error', reject);
+            });
+          });
+          fs.writeFileSync(path.join(passModelPath, 'strip.png'), stripData);
+          fs.writeFileSync(path.join(passModelPath, 'strip@2x.png'), strip2xData);
+        } catch(e) { console.log('strip load error:', e.message); }
+      }
+    }
+
     const pass = await PKPass.from({
       model: path.join(__dirname, 'pass-model.pass'),
       certificates: {
@@ -388,6 +442,51 @@ async function sendPushToApple(pushToken) {
 app.post('/v1/log', (req, res) => {
   console.log('Apple Wallet Log:', JSON.stringify(req.body));
   res.status(200).send();
+});
+
+
+// ===== Cloudinary Image Upload =====
+const cloudinary = require('cloudinary').v2;
+const multer = require('multer');
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dzvash41m',
+  api_key: process.env.CLOUDINARY_API_KEY || '321312446771719',
+  api_secret: process.env.CLOUDINARY_API_SECRET || 'v-f-vwIE1pIvmKXKiGGsktVP9KQ'
+});
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
+
+// رفع لوجو التاجر
+app.post('/api/merchant/:merchantId/upload-logo', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'لا يوجد ملف' });
+    const result = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: 'loyalty/logos', public_id: req.params.merchantId + '_logo', overwrite: true, width: 160, height: 50, crop: 'fill' },
+        (error, result) => error ? reject(error) : resolve(result)
+      );
+      stream.end(req.file.buffer);
+    });
+    await db.collection('merchants').doc(req.params.merchantId).update({ logoUrl: result.secure_url });
+    res.json({ url: result.secure_url });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// رفع صورة strip للبطاقة
+app.post('/api/merchant/:merchantId/upload-strip', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'لا يوجد ملف' });
+    const result = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: 'loyalty/strips', public_id: req.params.merchantId + '_strip', overwrite: true, width: 750, height: 288, crop: 'fill' },
+        (error, result) => error ? reject(error) : resolve(result)
+      );
+      stream.end(req.file.buffer);
+    });
+    await db.collection('merchants').doc(req.params.merchantId).update({ stripUrl: result.secure_url });
+    res.json({ url: result.secure_url });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // ===== ADMIN PANEL =====
