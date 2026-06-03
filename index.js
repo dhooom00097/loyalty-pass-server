@@ -193,6 +193,55 @@ app.get('/api/customer/:customerId', async (req, res) => {
     res.json(doc.data());
 } catch (err) { console.error('PASS ERROR:', err); res.status(500).json({ error: err.message, stack: err.stack }); }});
 
+
+// قائمة عملاء التاجر
+app.get('/api/merchant/:merchantId/customers', async (req, res) => {
+  try {
+    const snapshot = await db.collection('customers')
+      .where('merchantId', '==', req.params.merchantId)
+      .get();
+    const customers = snapshot.docs.map(doc => {
+      const d = doc.data();
+      return {
+        customerId: doc.id,
+        name: d.name,
+        phone: d.phone,
+        stamps: d.stamps,
+        totalGifts: d.totalGifts || 0,
+        shortCode: d.shortCode,
+        lastVisit: d.lastVisit ? d.lastVisit.toDate() : null,
+        createdAt: d.createdAt ? d.createdAt.toDate() : null
+      };
+    });
+    customers.sort((a, b) => (b.lastVisit || 0) - (a.lastVisit || 0));
+    res.json(customers);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// استرداد هدية
+app.post('/api/redeem', async (req, res) => {
+  try {
+    const { code, merchantId } = req.body;
+    const snapshot = await db.collection('customers')
+      .where('shortCode', '==', code)
+      .where('merchantId', '==', merchantId)
+      .get();
+    if (snapshot.empty) return res.status(404).json({ error: 'رقم البطاقة غير موجود' });
+    const doc = snapshot.docs[0];
+    const customer = doc.data();
+    if (!customer.totalGifts || customer.totalGifts < 1) {
+      return res.status(400).json({ error: 'لا يوجد رصيد هدايا' });
+    }
+    const newGifts = customer.totalGifts - 1;
+    await db.collection('customers').doc(doc.id).update({
+      totalGifts: newGifts,
+      lastVisit: admin.firestore.FieldValue.serverTimestamp()
+    });
+    if (customer.pushToken) sendPushToApple(customer.pushToken).catch(console.error);
+    res.json({ success: true, name: customer.name, remainingGifts: newGifts });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 app.get('/merchant/:merchantId', (req, res) => {
   res.sendFile(require('path').join(__dirname, 'public', 'merchant-dashboard.html'));
 });
