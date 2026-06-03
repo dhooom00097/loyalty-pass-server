@@ -7,6 +7,12 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
+const rateLimit = require('express-rate-limit');
+const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100, message: { error: 'طلبات كثيرة، انتظر قليلاً' } });
+const scanLimiter = rateLimit({ windowMs: 60 * 1000, max: 30, message: { error: 'طلبات كثيرة' } });
+app.use('/api/admin', limiter);
+app.use('/api/scan', scanLimiter);
+app.use('/api/scan-by-code', scanLimiter);
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
