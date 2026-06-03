@@ -4,78 +4,142 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>لوحة التاجر</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, sans-serif; background: #0a0a0a; color: #fff; min-height: 100vh; }
-#pin-screen { position: fixed; inset: 0; background: #0a0a0a; z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; }
-.pin-card { background: #1a1a1a; border-radius: 24px; padding: 40px 32px; width: 100%; max-width: 360px; border: 1px solid #2a2a2a; text-align: center; }
-.pin-icon { font-size: 40px; margin-bottom: 16px; }
-.pin-title { font-size: 20px; font-weight: 700; color: #F5C47A; margin-bottom: 8px; }
-.pin-sub { font-size: 13px; color: #666; margin-bottom: 32px; }
-.pin-input { width: 100%; background: #111; border: 2px solid #333; border-radius: 14px; padding: 18px; font-size: 32px; color: #F5C47A; text-align: center; outline: none; font-family: inherit; letter-spacing: 8px; margin-bottom: 16px; }
-.pin-input:focus { border-color: #851109; }
-.pin-btn { width: 100%; background: #851109; color: #F5C47A; border: none; border-radius: 14px; padding: 16px; font-size: 17px; font-weight: 700; cursor: pointer; font-family: inherit; }
-.pin-error { color: #f44336; font-size: 13px; margin-top: 12px; min-height: 20px; }
+:root {
+  --bg: #0f0f13;
+  --surface: #1a1a24;
+  --surface2: #22222f;
+  --border: rgba(255,255,255,0.08);
+  --accent: #6c63ff;
+  --accent2: #a855f7;
+  --text: #f0f0ff;
+  --text2: #8888aa;
+  --success: #22c55e;
+  --danger: #ef4444;
+  --gold: #f59e0b;
+}
+body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+#pin-screen { position: fixed; inset: 0; background: var(--bg); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.pin-card { background: var(--surface); border-radius: 28px; padding: 44px 32px; width: 100%; max-width: 360px; border: 1px solid var(--border); text-align: center; box-shadow: 0 24px 80px rgba(108,99,255,0.15); }
+.pin-icon { font-size: 44px; margin-bottom: 16px; }
+.pin-title { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.pin-sub { font-size: 13px; color: var(--text2); margin-bottom: 32px; }
+.pin-input { width: 100%; background: var(--bg); border: 2px solid var(--border); border-radius: 16px; padding: 18px; font-size: 32px; color: var(--gold); text-align: center; outline: none; font-family: inherit; letter-spacing: 10px; margin-bottom: 16px; transition: border-color 0.2s; }
+.pin-input:focus { border-color: var(--accent); }
+.pin-btn { width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border: none; border-radius: 14px; padding: 16px; font-size: 17px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.pin-error { color: var(--danger); font-size: 13px; margin-top: 12px; min-height: 20px; }
+
 #main-app { display: none; }
-.header { background: #851109; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
-.header-name { font-size: 18px; font-weight: 700; color: #F5C47A; }
-.header-sub { font-size: 12px; color: #F5C47A; opacity: 0.7; margin-top: 2px; }
+.header { background: var(--surface); padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.header-accent { width: 4px; height: 40px; background: linear-gradient(180deg, var(--accent), var(--accent2)); border-radius: 4px; margin-left: 12px; flex-shrink: 0; }
+.header-name { font-size: 20px; font-weight: 700; color: var(--text); }
+.header-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
 .header-btns { display: flex; gap: 8px; }
-.icon-btn { background: rgba(255,255,255,0.15); border: none; color: #F5C47A; width: 36px; height: 36px; border-radius: 50%; font-size: 16px; cursor: pointer; }
-.tabs { display: flex; background: #111; border-bottom: 1px solid #2a2a2a; }
-.tab { flex: 1; padding: 12px; text-align: center; font-size: 13px; color: #666; cursor: pointer; border-bottom: 2px solid transparent; }
-.tab.active { color: #F5C47A; border-bottom-color: #F5C47A; }
+.icon-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); width: 38px; height: 38px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+.tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); }
+.tab { flex: 1; padding: 13px 8px; text-align: center; font-size: 12px; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
 .tab-content { display: none; padding: 16px; }
 .tab-content.active { display: block; }
+
 .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-.stat { background: #1a1a1a; border-radius: 14px; padding: 14px; border: 1px solid #2a2a2a; text-align: center; }
-.stat-num { font-size: 24px; font-weight: 700; color: #F5C47A; }
-.stat-lbl { font-size: 11px; color: #666; margin-top: 4px; }
-.scan-section { background: #1a1a1a; border-radius: 16px; padding: 20px; border: 1px solid #2a2a2a; margin-bottom: 16px; }
-.scan-label { font-size: 13px; color: #888; margin-bottom: 10px; text-align: center; }
-.code-input { width: 100%; background: #111; border: 2px solid #333; border-radius: 12px; padding: 16px; font-size: 26px; font-weight: 700; color: #F5C47A; text-align: center; outline: none; font-family: inherit; letter-spacing: 3px; }
-.code-input:focus { border-color: #851109; }
-.scan-btn { width: 100%; background: #851109; color: #F5C47A; border: none; border-radius: 12px; padding: 16px; font-size: 17px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 12px; }
-.redeem-btn { width: 100%; background: #1a4a1a; color: #4CAF50; border: 1px solid #2a6a2a; border-radius: 12px; padding: 16px; font-size: 17px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 10px; }
-.result-card { display: none; background: #1a1a1a; border-radius: 16px; padding: 20px; border: 1px solid #2a2a2a; margin-bottom: 16px; text-align: center; }
+.stat { background: var(--surface); border-radius: 16px; padding: 16px 12px; border: 1px solid var(--border); text-align: center; position: relative; overflow: hidden; }
+.stat::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+.stat-num { font-size: 26px; font-weight: 700; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.stat-lbl { font-size: 11px; color: var(--text2); margin-top: 4px; }
+
+.scan-toggle { display: flex; background: var(--surface2); border-radius: 14px; padding: 4px; margin-bottom: 16px; gap: 4px; }
+.toggle-btn { flex: 1; padding: 11px 8px; text-align: center; font-size: 13px; font-weight: 600; color: var(--text2); cursor: pointer; border-radius: 10px; border: none; background: transparent; font-family: inherit; transition: all 0.2s; }
+.toggle-btn.active { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; box-shadow: 0 4px 15px rgba(108,99,255,0.3); }
+
+.camera-box { background: var(--surface); border-radius: 18px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 16px; }
+.camera-inner { position: relative; display: none; }
+#qr-video { width: 100%; max-height: 270px; object-fit: cover; display: block; }
+#qr-canvas { display: none; }
+.scan-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; background: rgba(0,0,0,0.3); }
+.scan-frame { width: 175px; height: 175px; border-radius: 16px; position: relative; }
+.scan-frame::before, .scan-frame::after { content: ''; position: absolute; width: 40px; height: 40px; border-color: var(--accent); border-style: solid; }
+.scan-frame::before { top: 0; right: 0; border-width: 3px 3px 0 0; border-radius: 0 12px 0 0; }
+.scan-frame::after { bottom: 0; left: 0; border-width: 0 0 3px 3px; border-radius: 0 0 0 12px; }
+.scan-frame-tl { position: absolute; top: 0; left: 0; width: 40px; height: 40px; border-top: 3px solid var(--accent); border-left: 3px solid var(--accent); border-radius: 12px 0 0 0; }
+.scan-frame-br { position: absolute; bottom: 0; right: 0; width: 40px; height: 40px; border-bottom: 3px solid var(--accent); border-right: 3px solid var(--accent); border-radius: 0 0 12px 0; }
+.scan-line { position: absolute; left: 10%; right: 10%; height: 2px; background: linear-gradient(90deg, transparent, var(--accent), transparent); animation: scanline 2s linear infinite; }
+@keyframes scanline { 0% { top: 10%; } 100% { top: 90%; } }
+.camera-status { padding: 14px 16px; text-align: center; font-size: 13px; color: var(--text2); }
+.camera-btns { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 8px; }
+.start-btn { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border: none; border-radius: 14px; padding: 16px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.stop-btn { display: none; background: var(--surface2); color: var(--text2); border: 1px solid var(--border); border-radius: 12px; padding: 12px; font-size: 14px; cursor: pointer; font-family: inherit; }
+
+.scan-section { background: var(--surface); border-radius: 18px; padding: 20px; border: 1px solid var(--border); margin-bottom: 16px; }
+.scan-label { font-size: 13px; color: var(--text2); margin-bottom: 10px; text-align: center; }
+.code-input { width: 100%; background: var(--bg); border: 2px solid var(--border); border-radius: 14px; padding: 16px; font-size: 26px; font-weight: 700; color: var(--gold); text-align: center; outline: none; font-family: inherit; letter-spacing: 3px; transition: border-color 0.2s; }
+.code-input:focus { border-color: var(--accent); }
+.scan-btn { width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border: none; border-radius: 14px; padding: 16px; font-size: 17px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 12px; transition: opacity 0.2s; }
+.scan-btn:disabled { opacity: 0.4; }
+
+.result-card { display: none; background: var(--surface); border-radius: 18px; padding: 20px; border: 1px solid var(--border); margin-bottom: 16px; text-align: center; }
 .result-name { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
-.result-sub { font-size: 13px; color: #4CAF50; margin-bottom: 16px; }
+.result-sub { font-size: 13px; color: var(--success); margin-bottom: 16px; }
 .cups { display: flex; gap: 6px; justify-content: center; margin-bottom: 10px; flex-wrap: wrap; }
 .cup { font-size: 30px; }
 .cup.empty { opacity: 0.2; filter: grayscale(1); }
-.result-text { font-size: 14px; color: #F5C47A; }
-.gift-banner { display: none; background: #1a4a1a; border: 1px solid #2a6a2a; border-radius: 16px; padding: 28px 20px; text-align: center; margin-bottom: 16px; }
+.result-text { font-size: 14px; color: var(--gold); }
+
+.gift-banner { display: none; background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.25); border-radius: 18px; padding: 28px 20px; text-align: center; margin-bottom: 16px; }
 .gift-icon { font-size: 52px; margin-bottom: 10px; }
-.gift-text { font-size: 20px; font-weight: 700; color: #4CAF50; }
-.redeem-banner { display: none; background: #4a3800; border: 1px solid #6a5200; border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 16px; }
-.recent-section { background: #1a1a1a; border-radius: 16px; border: 1px solid #2a2a2a; overflow: hidden; }
-.section-header-label { padding: 14px 18px; font-size: 14px; font-weight: 600; border-bottom: 1px solid #2a2a2a; color: #888; }
-.recent-item { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid #1f1f1f; }
-.avatar { width: 36px; height: 36px; border-radius: 50%; background: #851109; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #F5C47A; flex-shrink: 0; }
+.gift-text { font-size: 20px; font-weight: 700; color: var(--success); }
+
+.redeem-banner { display: none; background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); border-radius: 18px; padding: 20px; text-align: center; margin-bottom: 16px; }
+.redeem-btn { width: 100%; background: rgba(34,197,94,0.1); color: var(--success); border: 1px solid rgba(34,197,94,0.25); border-radius: 14px; padding: 16px; font-size: 17px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 10px; }
+
+.recent-section { background: var(--surface); border-radius: 18px; border: 1px solid var(--border); overflow: hidden; }
+.section-label { padding: 14px 18px; font-size: 13px; font-weight: 600; border-bottom: 1px solid var(--border); color: var(--text2); display: flex; align-items: center; gap: 6px; }
+.recent-item { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--border); }
+.avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #fff; flex-shrink: 0; }
 .item-name { font-size: 14px; font-weight: 500; }
-.item-sub { font-size: 12px; color: #888; margin-top: 2px; }
-.item-time { font-size: 11px; color: #555; margin-right: auto; }
-.customers-list { background: #1a1a1a; border-radius: 16px; border: 1px solid #2a2a2a; overflow: hidden; }
-.customer-item { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid #1f1f1f; }
+.item-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.item-time { font-size: 11px; color: var(--text2); margin-right: auto; }
+
+.search-input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 13px 16px; font-size: 14px; color: var(--text); outline: none; font-family: inherit; margin-bottom: 12px; }
+.search-input:focus { border-color: var(--accent); }
+.customers-list { background: var(--surface); border-radius: 18px; border: 1px solid var(--border); overflow: hidden; }
+.customer-item { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--border); }
 .customer-badges { display: flex; gap: 6px; margin-right: auto; flex-direction: column; align-items: flex-end; }
-.badge { padding: 3px 8px; border-radius: 999px; font-size: 11px; }
-.badge-stamps { background: #2a2a2a; color: #F5C47A; }
-.badge-gifts { background: #1a4a1a; color: #4CAF50; }
-.search-input { width: 100%; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 12px 16px; font-size: 14px; color: #fff; outline: none; font-family: inherit; margin-bottom: 12px; }
-.inactive-banner { background: #4a1a1a; border: 1px solid #6a2a2a; border-radius: 12px; padding: 14px; text-align: center; margin-bottom: 16px; color: #f44336; font-weight: 600; font-size: 14px; }
-.empty-state { padding: 32px; text-align: center; color: #444; font-size: 14px; }
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 300; align-items: flex-end; justify-content: center; }
+.badge { padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+.badge-stamps { background: rgba(108,99,255,0.12); color: var(--accent); }
+.badge-gifts { background: rgba(34,197,94,0.12); color: var(--success); }
+.empty-state { padding: 32px; text-align: center; color: var(--text2); font-size: 14px; }
+.inactive-banner { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 14px; padding: 14px; text-align: center; margin-bottom: 16px; color: var(--danger); font-weight: 600; font-size: 14px; }
+
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(10px); z-index: 300; align-items: flex-end; justify-content: center; }
 .modal-overlay.show { display: flex; }
-.modal { background: #1a1a1a; border-radius: 20px 20px 0 0; padding: 28px 20px 40px; width: 100%; max-width: 500px; border-top: 1px solid #2a2a2a; }
-.modal-title { font-size: 17px; font-weight: 700; margin-bottom: 20px; color: #F5C47A; text-align: center; }
+.modal { background: var(--surface); border-radius: 24px 24px 0 0; padding: 28px 20px 44px; width: 100%; max-width: 500px; border-top: 1px solid var(--border); max-height: 88vh; overflow-y: auto; }
+.modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
+.modal-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; text-align: center; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 .field { margin-bottom: 16px; }
-.field label { display: block; font-size: 13px; color: #888; margin-bottom: 8px; }
-.field input { width: 100%; background: #111; border: 1px solid #333; border-radius: 10px; padding: 12px 14px; font-size: 15px; color: #fff; outline: none; font-family: inherit; }
-.color-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
-.color-opt { width: 36px; height: 36px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; }
-.color-opt.selected { border-color: #F5C47A; }
-.save-btn { width: 100%; background: #851109; color: #F5C47A; border: none; border-radius: 12px; padding: 14px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 8px; }
-.cancel-btn { width: 100%; background: #2a2a2a; color: #888; border: none; border-radius: 12px; padding: 12px; font-size: 15px; cursor: pointer; font-family: inherit; margin-top: 8px; }
+.field label { display: block; font-size: 13px; color: var(--text2); margin-bottom: 8px; }
+.field input[type=text], .field input[type=number] { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 13px 14px; font-size: 15px; color: var(--text); outline: none; font-family: inherit; transition: border-color 0.2s; }
+.field input:focus { border-color: var(--accent); }
+.color-presets { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.color-opt { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform 0.15s; }
+.color-opt:hover { transform: scale(1.1); }
+.color-opt.selected { border-color: #fff; box-shadow: 0 0 0 2px var(--accent); }
+.custom-color-row { display: flex; gap: 10px; align-items: center; }
+.custom-color-row input[type=color] { width: 44px; height: 44px; border: none; border-radius: 10px; cursor: pointer; padding: 2px; background: none; }
+.custom-color-row span { font-size: 13px; color: var(--text2); }
+.icon-opts { display: flex; gap: 8px; flex-wrap: wrap; }
+.icon-opt { font-size: 26px; cursor: pointer; padding: 8px; border-radius: 10px; border: 2px solid transparent; transition: all 0.15s; }
+.icon-opt:hover { background: var(--surface2); }
+.icon-opt.selected { border-color: var(--accent); background: rgba(108,99,255,0.12); }
+.file-input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px; color: var(--text); font-family: inherit; font-size: 13px; }
+.img-preview { width: 100%; height: 70px; object-fit: contain; margin-top: 8px; border-radius: 10px; background: var(--bg); display: none; }
+.save-btn { width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border: none; border-radius: 14px; padding: 15px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 8px; }
+.cancel-btn { width: 100%; background: var(--surface2); color: var(--text2); border: none; border-radius: 14px; padding: 13px; font-size: 15px; cursor: pointer; font-family: inherit; margin-top: 8px; }
 </style>
 </head>
 <body>
@@ -93,9 +157,12 @@ body { font-family: -apple-system, sans-serif; background: #0a0a0a; color: #fff;
 
 <div id="main-app">
   <div class="header">
-    <div>
-      <div class="header-name" id="merchant-name">جاري التحميل...</div>
-      <div class="header-sub" id="merchant-time">لوحة التاجر</div>
+    <div style="display:flex;align-items:center;">
+      <div class="header-accent"></div>
+      <div>
+        <div class="header-name" id="merchant-name">جاري التحميل...</div>
+        <div class="header-sub" id="merchant-time">لوحة التاجر</div>
+      </div>
     </div>
     <div class="header-btns">
       <button class="icon-btn" id="settings-btn">⚙️</button>
@@ -110,12 +177,19 @@ body { font-family: -apple-system, sans-serif; background: #0a0a0a; color: #fff;
   </div>
 
   <div class="tab-content active" id="tab-scan">
-    <div id="inactive-banner" class="inactive-banner" style="display:none;">⚠️ الاشتراك غير فعّال</div>
+    <div id="inactive-banner" class="inactive-banner" style="display:none;">⚠️ الاشتراك غير فعّال — تواصل مع الإدارة</div>
+
     <div class="stats-row">
       <div class="stat"><div class="stat-num" id="stat-customers">0</div><div class="stat-lbl">عميل</div></div>
       <div class="stat"><div class="stat-num" id="stat-today">0</div><div class="stat-lbl">اليوم</div></div>
-      <div class="stat"><div class="stat-num" id="stat-stamps">0</div><div class="stat-lbl">ختمة للهدية</div></div>
+      <div class="stat"><div class="stat-num" id="stat-stamps">0</div><div class="stat-lbl">ختمة/هدية</div></div>
     </div>
+
+    <div class="scan-toggle">
+      <button class="toggle-btn active" id="mode-camera-btn" onclick="switchMode('camera')">📷 كاميرا QR</button>
+      <button class="toggle-btn" id="mode-manual-btn" onclick="switchMode('manual')">⌨️ إدخال يدوي</button>
+    </div>
+
     <div class="gift-banner" id="gift-banner">
       <div class="gift-icon">🎁</div>
       <div class="gift-text" id="gift-name">مبروك!</div>
@@ -126,53 +200,137 @@ body { font-family: -apple-system, sans-serif; background: #0a0a0a; color: #fff;
       <div class="cups" id="res-cups"></div>
       <div class="result-text" id="res-text"></div>
     </div>
-    <div class="scan-section">
-      <div class="scan-label">أدخل رقم بطاقة العميل</div>
-      <input class="code-input" id="code-input" type="tel" placeholder="0000000" />
-      <button class="scan-btn" id="scan-btn">✓ إضافة ختمة</button>
+
+    <div id="camera-mode">
+      <div class="camera-box">
+        <div class="camera-inner" id="camera-inner">
+          <video id="qr-video" playsinline autoplay muted></video>
+          <canvas id="qr-canvas"></canvas>
+          <div class="scan-overlay">
+            <div class="scan-frame">
+              <div class="scan-frame-tl"></div>
+              <div class="scan-frame-br"></div>
+              <div class="scan-line"></div>
+            </div>
+          </div>
+        </div>
+        <div class="camera-status" id="camera-status">وجّه الكاميرا على رمز QR في بطاقة العميل</div>
+        <div class="camera-btns">
+          <button class="start-btn" id="start-btn" onclick="startCamera()">📷 تشغيل الكاميرا</button>
+          <button class="stop-btn" id="stop-btn" onclick="stopCamera()">⏹ إيقاف الكاميرا</button>
+        </div>
+      </div>
     </div>
+
+    <div id="manual-mode" style="display:none;">
+      <div class="scan-section">
+        <div class="scan-label">أدخل رقم بطاقة العميل من الـ Wallet</div>
+        <input class="code-input" id="code-input" type="tel" placeholder="0000000" />
+        <button class="scan-btn" id="scan-btn">✓ إضافة ختمة</button>
+      </div>
+    </div>
+
     <div class="recent-section">
-      <div class="section-header-label">آخر العمليات</div>
+      <div class="section-label">⏱ آخر العمليات</div>
       <div id="recent-list"><div class="empty-state">لا توجد عمليات بعد</div></div>
     </div>
   </div>
 
   <div class="tab-content" id="tab-customers">
-    <input class="search-input" id="search-input" type="text" placeholder="🔍 ابحث عن عميل..." />
-    <div class="customers-list" id="customers-list">
-      <div class="empty-state">جاري التحميل...</div>
-    </div>
+    <input class="search-input" id="search-input" type="text" placeholder="🔍 ابحث باسم أو رقم البطاقة..." />
+    <div class="customers-list" id="customers-list"><div class="empty-state">جاري التحميل...</div></div>
   </div>
 
   <div class="tab-content" id="tab-redeem">
     <div class="redeem-banner" id="redeem-banner">
-      <div style="font-size:18px;font-weight:700;color:#F5C47A;" id="redeem-text"></div>
-      <div style="font-size:13px;color:#888;margin-top:6px;" id="redeem-sub"></div>
+      <div style="font-size:18px;font-weight:700;color:var(--gold);" id="redeem-text"></div>
+      <div style="font-size:13px;color:var(--text2);margin-top:6px;" id="redeem-sub"></div>
     </div>
     <div class="scan-section">
       <div class="scan-label">أدخل رقم البطاقة لاسترداد هدية</div>
       <input class="code-input" id="redeem-input" type="tel" placeholder="0000000" />
       <button class="redeem-btn" id="redeem-btn">🎁 استرداد هدية</button>
     </div>
+    <div style="background:var(--surface);border-radius:14px;padding:16px;border:1px solid var(--border);margin-top:4px;">
+      <div style="font-size:13px;color:var(--text2);line-height:2.2;">
+        <div>• العميل يحصل على هدية بعد <span id="info-stamps" style="color:var(--gold);font-weight:700;">4</span> ختمات</div>
+        <div>• استرداد الهدية ينقص من رصيد العميل</div>
+        <div>• البطاقة تتحدث تلقائياً في Apple Wallet</div>
+      </div>
+    </div>
   </div>
 </div>
 
 <div class="modal-overlay" id="settings-modal">
   <div class="modal">
+    <div class="modal-handle"></div>
     <div class="modal-title">⚙️ إعدادات المحل</div>
     <div class="field"><label>اسم المحل</label><input type="text" id="s-name" /></div>
     <div class="field">
       <label>لون البطاقة</label>
-      <div class="color-row">
-        <div class="color-opt selected" style="background:#851109" data-color="rgb(133, 17, 9)"></div>
-        <div class="color-opt" style="background:#0a3d62" data-color="rgb(10, 61, 98)"></div>
-        <div class="color-opt" style="background:#1a4a1a" data-color="rgb(26, 74, 26)"></div>
-        <div class="color-opt" style="background:#4a1a4a" data-color="rgb(74, 26, 74)"></div>
-        <div class="color-opt" style="background:#1a1a4a" data-color="rgb(26, 26, 74)"></div>
-        <div class="color-opt" style="background:#4a3000" data-color="rgb(74, 48, 0)"></div>
+      <div class="color-presets">
+        <div class="color-opt selected" style="background:#851109" data-color="rgb(133,17,9)"></div>
+        <div class="color-opt" style="background:#1e3a5f" data-color="rgb(30,58,95)"></div>
+        <div class="color-opt" style="background:#14532d" data-color="rgb(20,83,45)"></div>
+        <div class="color-opt" style="background:#4c1d95" data-color="rgb(76,29,149)"></div>
+        <div class="color-opt" style="background:#1e1b4b" data-color="rgb(30,27,75)"></div>
+        <div class="color-opt" style="background:#7c2d12" data-color="rgb(124,45,18)"></div>
+        <div class="color-opt" style="background:#0f172a" data-color="rgb(15,23,42)"></div>
+        <div class="color-opt" style="background:#134e4a" data-color="rgb(19,78,74)"></div>
+        <div class="color-opt" style="background:#3b0764" data-color="rgb(59,7,100)"></div>
+        <div class="color-opt" style="background:#1c1917" data-color="rgb(28,25,23)"></div>
+        <div class="color-opt" style="background:#450a0a" data-color="rgb(69,10,10)"></div>
+        <div class="color-opt" style="background:#052e16" data-color="rgb(5,46,22)"></div>
+        <div class="color-opt" style="background:#0c1445" data-color="rgb(12,20,69)"></div>
+        <div class="color-opt" style="background:#2d1b69" data-color="rgb(45,27,105)"></div>
+        <div class="color-opt" style="background:#1f2937" data-color="rgb(31,41,55)"></div>
+        <div class="color-opt" style="background:#312e81" data-color="rgb(49,46,129)"></div>
+        <div class="color-opt" style="background:#164e63" data-color="rgb(22,78,99)"></div>
+        <div class="color-opt" style="background:#365314" data-color="rgb(54,83,20)"></div>
+        <div class="color-opt" style="background:#713f12" data-color="rgb(113,63,18)"></div>
+        <div class="color-opt" style="background:#881337" data-color="rgb(136,19,55)"></div>
+        <div class="color-opt" style="background:#0a0a0a" data-color="rgb(10,10,10)"></div>
+        <div class="color-opt" style="background:#1a0533" data-color="rgb(26,5,51)"></div>
+        <div class="color-opt" style="background:#0d3b2e" data-color="rgb(13,59,46)"></div>
+        <div class="color-opt" style="background:#2c1810" data-color="rgb(44,24,16)"></div>
+      </div>
+      <div class="custom-color-row" style="margin-top:10px;">
+        <input type="color" id="custom-color" value="#851109" />
+        <span>لون مخصص</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>أيقونة المحل</label>
+      <div class="icon-opts">
+        <span class="icon-opt selected" data-icon="☕">☕</span>
+        <span class="icon-opt" data-icon="🚗">🚗</span>
+        <span class="icon-opt" data-icon="🍕">🍕</span>
+        <span class="icon-opt" data-icon="💇">💇</span>
+        <span class="icon-opt" data-icon="🛒">🛒</span>
+        <span class="icon-opt" data-icon="💊">💊</span>
+        <span class="icon-opt" data-icon="👗">👗</span>
+        <span class="icon-opt" data-icon="🍔">🍔</span>
+        <span class="icon-opt" data-icon="🧁">🧁</span>
+        <span class="icon-opt" data-icon="💈">💈</span>
+        <span class="icon-opt" data-icon="🏋️">🏋️</span>
+        <span class="icon-opt" data-icon="📚">📚</span>
+        <span class="icon-opt" data-icon="💻">💻</span>
+        <span class="icon-opt" data-icon="🎮">🎮</span>
+        <span class="icon-opt" data-icon="🌿">🌿</span>
+        <span class="icon-opt" data-icon="⭐">⭐</span>
       </div>
     </div>
     <div class="field"><label>عدد الختمات للهدية</label><input type="number" id="s-stamps" min="1" max="20" /></div>
+    <div class="field">
+      <label>لوجو المحل</label>
+      <input type="file" class="file-input" id="logo-file" accept="image/*" />
+      <img class="img-preview" id="logo-preview" />
+    </div>
+    <div class="field">
+      <label>صورة البطاقة (strip)</label>
+      <input type="file" class="file-input" id="strip-file" accept="image/*" />
+      <img class="img-preview" id="strip-preview" style="height:90px;object-fit:cover;" />
+    </div>
     <button class="save-btn" id="save-settings-btn">حفظ التغييرات</button>
     <button class="cancel-btn" id="cancel-settings-btn">إلغاء</button>
   </div>
@@ -184,41 +342,35 @@ var merchantData = {};
 var allCustomers = [];
 var recentOps = [];
 var scansToday = 0;
-var selectedColor = 'rgb(133, 17, 9)';
+var selectedColor = 'rgb(133,17,9)';
+var selectedIcon = '☕';
+var videoStream = null;
+var scannerActive = false;
+var lastScanned = '';
+var lastScannedTime = 0;
 
 // PIN
 document.getElementById('pin-btn').addEventListener('click', verifyPin);
-document.getElementById('pin-input').addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') verifyPin();
-});
+document.getElementById('pin-input').addEventListener('keypress', function(e) { if (e.key === 'Enter') verifyPin(); });
 
 async function checkPin() {
   var saved = localStorage.getItem('pin_' + merchantId);
-  if (saved) {
-    showApp();
-  } else {
-    var res = await fetch('/api/merchant/' + merchantId);
-    var data = await res.json();
-    if (data.name) document.getElementById('pin-title').textContent = data.name;
-  }
+  if (saved) { showApp(); return; }
+  var res = await fetch('/api/merchant/' + merchantId);
+  var data = await res.json();
+  if (data.name) document.getElementById('pin-title').textContent = data.name;
 }
 
 async function verifyPin() {
   var pin = document.getElementById('pin-input').value.trim();
   if (pin.length < 4) { document.getElementById('pin-error').textContent = 'أدخل 4 أرقام'; return; }
   var res = await fetch('/api/merchant/' + merchantId + '/verify-pin', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ pin: pin })
   });
   var data = await res.json();
-  if (data.success) {
-    localStorage.setItem('pin_' + merchantId, pin);
-    showApp();
-  } else {
-    document.getElementById('pin-error').textContent = data.error || 'PIN غير صحيح';
-    document.getElementById('pin-input').value = '';
-  }
+  if (data.success) { localStorage.setItem('pin_' + merchantId, pin); showApp(); }
+  else { document.getElementById('pin-error').textContent = data.error || 'PIN غير صحيح'; document.getElementById('pin-input').value = ''; }
 }
 
 function showApp() {
@@ -227,19 +379,19 @@ function showApp() {
   loadMerchant();
 }
 
-// Logout
 document.getElementById('logout-btn').addEventListener('click', function() {
+  stopCamera();
   localStorage.removeItem('pin_' + merchantId);
   document.getElementById('main-app').style.display = 'none';
   document.getElementById('pin-screen').style.display = 'flex';
   document.getElementById('pin-input').value = '';
-  document.getElementById('pin-error').textContent = '';
 });
 
 // Tabs
 document.querySelectorAll('.tab').forEach(function(tab) {
   tab.addEventListener('click', function() {
     var name = this.dataset.tab;
+    if (name !== 'scan') stopCamera();
     document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
     document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
     this.classList.add('active');
@@ -248,7 +400,92 @@ document.querySelectorAll('.tab').forEach(function(tab) {
   });
 });
 
-// Merchant data
+// Scan Mode
+function switchMode(mode) {
+  document.getElementById('mode-camera-btn').classList.toggle('active', mode === 'camera');
+  document.getElementById('mode-manual-btn').classList.toggle('active', mode === 'manual');
+  document.getElementById('camera-mode').style.display = mode === 'camera' ? 'block' : 'none';
+  document.getElementById('manual-mode').style.display = mode === 'manual' ? 'block' : 'none';
+  if (mode !== 'camera') stopCamera();
+}
+
+// Camera
+async function startCamera() {
+  try {
+    var stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } });
+    videoStream = stream;
+    var video = document.getElementById('qr-video');
+    video.srcObject = stream;
+    document.getElementById('camera-inner').style.display = 'block';
+    document.getElementById('start-btn').style.display = 'none';
+    document.getElementById('stop-btn').style.display = 'block';
+    document.getElementById('camera-status').textContent = 'وجّه على رمز QR في بطاقة العميل';
+    scannerActive = true;
+    requestAnimationFrame(scanFrame);
+  } catch(e) {
+    document.getElementById('camera-status').textContent = 'تعذر الوصول للكاميرا — جرّب الإدخال اليدوي';
+  }
+}
+
+function stopCamera() {
+  scannerActive = false;
+  if (videoStream) { videoStream.getTracks().forEach(function(t) { t.stop(); }); videoStream = null; }
+  document.getElementById('camera-inner').style.display = 'none';
+  document.getElementById('start-btn').style.display = 'block';
+  document.getElementById('stop-btn').style.display = 'none';
+  document.getElementById('camera-status').textContent = 'وجّه الكاميرا على رمز QR في بطاقة العميل';
+}
+
+function scanFrame() {
+  if (!scannerActive) return;
+  var video = document.getElementById('qr-video');
+  if (video.readyState !== video.HAVE_ENOUGH_DATA) { requestAnimationFrame(scanFrame); return; }
+  var canvas = document.getElementById('qr-canvas');
+  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+  var ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  if (typeof jsQR !== 'undefined') {
+    var code = jsQR(imageData.data, imageData.width, imageData.height);
+    if (code && code.data) {
+      var now = Date.now();
+      if (code.data !== lastScanned || now - lastScannedTime > 3000) {
+        lastScanned = code.data; lastScannedTime = now;
+        document.getElementById('camera-status').textContent = 'تم المسح ✓';
+        scanByCustomerId(code.data);
+      }
+    }
+  }
+  requestAnimationFrame(scanFrame);
+}
+
+async function scanByCustomerId(customerId) {
+  var res = await fetch('/api/scan', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ customerId: customerId, merchantId: merchantId })
+  });
+  var data = await res.json();
+  if (data.success) {
+    scansToday++; document.getElementById('stat-today').textContent = scansToday;
+    addRecent(data.name, data.stamps, data.stampsRequired, data.giftEarned);
+    if (data.giftEarned) {
+      document.getElementById('gift-banner').style.display = 'block';
+      document.getElementById('gift-name').textContent = data.name + ' حصل على هدية! 🎁';
+      document.getElementById('result-card').style.display = 'none';
+      document.getElementById('camera-status').textContent = '🎁 ' + data.name + ' — وجّه على بطاقة أخرى';
+      setTimeout(function() { document.getElementById('gift-banner').style.display = 'none'; document.getElementById('camera-status').textContent = 'وجّه على رمز QR في بطاقة العميل'; }, 4000);
+    } else {
+      document.getElementById('gift-banner').style.display = 'none';
+      showResult(data);
+      setTimeout(function() { document.getElementById('camera-status').textContent = 'وجّه على رمز QR في بطاقة العميل'; }, 3000);
+    }
+  } else {
+    document.getElementById('camera-status').textContent = '⚠️ ' + (data.error || 'خطأ');
+    setTimeout(function() { document.getElementById('camera-status').textContent = 'وجّه على رمز QR في بطاقة العميل'; }, 3000);
+  }
+}
+
+// Merchant
 async function loadMerchant() {
   var res = await fetch('/api/merchant/' + merchantId);
   var data = await res.json();
@@ -258,6 +495,7 @@ async function loadMerchant() {
   document.getElementById('stat-customers').textContent = data.customersCount || 0;
   document.getElementById('stat-today').textContent = data.stampsToday || 0;
   document.getElementById('stat-stamps').textContent = data.stampsRequired || 4;
+  document.getElementById('info-stamps').textContent = data.stampsRequired || 4;
   if (!data.active) {
     document.getElementById('inactive-banner').style.display = 'block';
     document.getElementById('scan-btn').disabled = true;
@@ -265,32 +503,32 @@ async function loadMerchant() {
   }
 }
 
-// Scan
-document.getElementById('scan-btn').addEventListener('click', doScan);
-document.getElementById('code-input').addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') doScan();
-});
-
-async function doScan() {
+// Manual Scan
+document.getElementById('scan-btn').addEventListener('click', function() {
   var code = document.getElementById('code-input').value.trim();
   if (!code) return;
+  manualScan(code);
+});
+document.getElementById('code-input').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') { var c = this.value.trim(); if (c) manualScan(c); }
+});
+
+async function manualScan(code) {
   var btn = document.getElementById('scan-btn');
   btn.disabled = true; btn.textContent = 'جاري...';
   var res = await fetch('/api/scan-by-code', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ code: code, merchantId: merchantId })
   });
   var data = await res.json();
   btn.disabled = false; btn.textContent = '✓ إضافة ختمة';
+  document.getElementById('code-input').value = '';
   if (data.success) {
-    scansToday++;
-    document.getElementById('stat-today').textContent = scansToday;
-    document.getElementById('code-input').value = '';
+    scansToday++; document.getElementById('stat-today').textContent = scansToday;
     addRecent(data.name, data.stamps, data.stampsRequired, data.giftEarned);
     if (data.giftEarned) {
       document.getElementById('gift-banner').style.display = 'block';
-      document.getElementById('gift-name').textContent = data.name + ' حصل على هدية! 🎉';
+      document.getElementById('gift-name').textContent = data.name + ' حصل على هدية! 🎁';
       document.getElementById('result-card').style.display = 'none';
       setTimeout(function() { document.getElementById('gift-banner').style.display = 'none'; }, 5000);
     } else {
@@ -308,7 +546,7 @@ function showResult(data) {
   for (var i = 0; i < data.stampsRequired; i++) {
     var c = document.createElement('span');
     c.className = 'cup' + (i < data.stamps ? '' : ' empty');
-    c.textContent = '☕';
+    c.textContent = merchantData.icon || '☕';
     cups.appendChild(c);
   }
   document.getElementById('res-text').textContent = 'باقي ' + (data.stampsRequired - data.stamps) + ' زيارة للهدية';
@@ -319,21 +557,19 @@ function addRecent(name, stamps, total, gift) {
   if (recentOps.length > 10) recentOps.pop();
   var list = document.getElementById('recent-list');
   list.innerHTML = recentOps.map(function(op) {
-    return '<div class="recent-item"><div class="avatar">' + op.name[0] + '</div><div><div class="item-name">' + op.name + '</div><div class="item-sub">' + (op.gift ? '🎁 حصل على هدية' : op.stamps + ' من ' + op.total) + '</div></div><div class="item-time">' + op.time.toLocaleTimeString('ar-SA', {hour:'2-digit', minute:'2-digit'}) + '</div></div>';
+    return '<div class="recent-item"><div class="avatar">' + op.name[0] + '</div><div><div class="item-name">' + op.name + '</div><div class="item-sub">' + (op.gift ? '🎁 حصل على هدية' : (merchantData.icon||'☕') + ' ' + op.stamps + '/' + op.total) + '</div></div><div class="item-time">' + op.time.toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'}) + '</div></div>';
   }).join('');
 }
 
 // Redeem
 document.getElementById('redeem-btn').addEventListener('click', doRedeem);
-
 async function doRedeem() {
   var code = document.getElementById('redeem-input').value.trim();
   if (!code) return;
   var btn = document.getElementById('redeem-btn');
   btn.disabled = true; btn.textContent = 'جاري...';
   var res = await fetch('/api/redeem', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ code: code, merchantId: merchantId })
   });
   var data = await res.json();
@@ -353,69 +589,75 @@ async function loadCustomers() {
   allCustomers = await res.json();
   renderCustomers(allCustomers);
 }
-
 function renderCustomers(list) {
   var el = document.getElementById('customers-list');
   if (!list.length) { el.innerHTML = '<div class="empty-state">لا يوجد عملاء بعد</div>'; return; }
   el.innerHTML = list.map(function(c) {
-    return '<div class="customer-item"><div class="avatar">' + c.name[0] + '</div><div style="flex:1"><div class="item-name">' + c.name + '</div><div class="item-sub">' + (c.phone||'') + ' • ' + (c.shortCode||'') + '</div><div class="item-sub">' + (c.lastVisit ? 'آخر زيارة: ' + new Date(c.lastVisit).toLocaleDateString('ar-SA') : 'لم يزر بعد') + '</div></div><div class="customer-badges"><span class="badge badge-stamps">☕ ' + c.stamps + '/' + (merchantData.stampsRequired||4) + '</span>' + (c.totalGifts > 0 ? '<span class="badge badge-gifts">🎁 ' + c.totalGifts + '</span>' : '') + '</div></div>';
+    return '<div class="customer-item"><div class="avatar">' + c.name[0] + '</div><div style="flex:1"><div class="item-name">' + c.name + '</div><div class="item-sub">' + (c.phone||'') + ' &#8226; ' + (c.shortCode||'') + '</div><div class="item-sub">' + (c.lastVisit ? 'آخر زيارة: ' + new Date(c.lastVisit).toLocaleDateString('ar-SA') : 'لم يزر بعد') + '</div></div><div class="customer-badges"><span class="badge badge-stamps">' + (merchantData.icon||'☕') + ' ' + c.stamps + '/' + (merchantData.stampsRequired||4) + '</span>' + (c.totalGifts > 0 ? '<span class="badge badge-gifts">🎁 ' + c.totalGifts + '</span>' : '') + '</div></div>';
   }).join('');
 }
-
 document.getElementById('search-input').addEventListener('input', function() {
   var q = this.value.toLowerCase();
-  var filtered = allCustomers.filter(function(c) {
-    return c.name.includes(q) || (c.phone && c.phone.includes(q)) || (c.shortCode && c.shortCode.includes(q));
-  });
-  renderCustomers(filtered);
+  renderCustomers(allCustomers.filter(function(c) {
+    return c.name.includes(q) || (c.phone&&c.phone.includes(q)) || (c.shortCode&&c.shortCode.includes(q));
+  }));
 });
 
 // Settings
 document.getElementById('settings-btn').addEventListener('click', function() {
   document.getElementById('s-name').value = merchantData.name || '';
   document.getElementById('s-stamps').value = merchantData.stampsRequired || 4;
-  selectedColor = merchantData.color || 'rgb(133, 17, 9)';
-  document.querySelectorAll('.color-opt').forEach(function(el) {
-    el.classList.toggle('selected', el.dataset.color === selectedColor);
-  });
+  selectedColor = merchantData.color || 'rgb(133,17,9)';
+  selectedIcon = merchantData.icon || '☕';
+  document.querySelectorAll('.color-opt').forEach(function(el) { el.classList.toggle('selected', el.dataset.color === selectedColor); });
+  document.querySelectorAll('.icon-opt').forEach(function(el) { el.classList.toggle('selected', el.dataset.icon === selectedIcon); });
   document.getElementById('settings-modal').classList.add('show');
 });
-
-document.getElementById('cancel-settings-btn').addEventListener('click', function() {
-  document.getElementById('settings-modal').classList.remove('show');
-});
-
+document.getElementById('cancel-settings-btn').addEventListener('click', function() { document.getElementById('settings-modal').classList.remove('show'); });
 document.querySelectorAll('.color-opt').forEach(function(el) {
   el.addEventListener('click', function() {
     document.querySelectorAll('.color-opt').forEach(function(e) { e.classList.remove('selected'); });
-    el.classList.add('selected');
-    selectedColor = el.dataset.color;
+    el.classList.add('selected'); selectedColor = el.dataset.color;
   });
 });
-
+document.getElementById('custom-color').addEventListener('input', function() {
+  var hex = this.value;
+  var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  selectedColor = 'rgb('+r+','+g+','+b+')';
+  document.querySelectorAll('.color-opt').forEach(function(e) { e.classList.remove('selected'); });
+});
+document.querySelectorAll('.icon-opt').forEach(function(el) {
+  el.addEventListener('click', function() {
+    document.querySelectorAll('.icon-opt').forEach(function(e) { e.classList.remove('selected'); });
+    el.classList.add('selected'); selectedIcon = el.dataset.icon;
+  });
+});
+document.getElementById('logo-file').addEventListener('change', function() {
+  if (this.files[0]) { var r = new FileReader(); r.onload = function(e) { var img = document.getElementById('logo-preview'); img.src = e.target.result; img.style.display = 'block'; }; r.readAsDataURL(this.files[0]); }
+});
+document.getElementById('strip-file').addEventListener('change', function() {
+  if (this.files[0]) { var r = new FileReader(); r.onload = function(e) { var img = document.getElementById('strip-preview'); img.src = e.target.result; img.style.display = 'block'; }; r.readAsDataURL(this.files[0]); }
+});
 document.getElementById('save-settings-btn').addEventListener('click', async function() {
   var name = document.getElementById('s-name').value.trim();
   var stampsRequired = parseInt(document.getElementById('s-stamps').value);
   if (!name) { alert('أدخل اسم المحل'); return; }
   var res = await fetch('/api/merchant/' + merchantId, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: name, color: selectedColor, stampsRequired: stampsRequired })
+    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: name, color: selectedColor, stampsRequired: stampsRequired, icon: selectedIcon })
   });
   var data = await res.json();
   if (data.success) {
+    var lf = document.getElementById('logo-file').files[0];
+    var sf = document.getElementById('strip-file').files[0];
+    if (lf) { var fd = new FormData(); fd.append('image', lf); await fetch('/api/merchant/'+merchantId+'/upload-logo', { method:'POST', body:fd }); }
+    if (sf) { var fd2 = new FormData(); fd2.append('image', sf); await fetch('/api/merchant/'+merchantId+'/upload-strip', { method:'POST', body:fd2 }); }
     document.getElementById('settings-modal').classList.remove('show');
-    loadMerchant();
-    alert('تم الحفظ ✓');
+    loadMerchant(); alert('تم الحفظ ✓');
   }
 });
 
-// Time
-setInterval(function() {
-  document.getElementById('merchant-time').textContent = new Date().toLocaleTimeString('ar-SA');
-}, 1000);
-
-// Start
+setInterval(function() { document.getElementById('merchant-time').textContent = new Date().toLocaleTimeString('ar-SA'); }, 1000);
 checkPin();
 </script>
 </body>
