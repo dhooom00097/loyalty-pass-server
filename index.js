@@ -242,6 +242,20 @@ app.post('/api/redeem', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+
+// التحقق من PIN التاجر
+app.post('/api/merchant/:merchantId/verify-pin', async (req, res) => {
+  try {
+    const { pin } = req.body;
+    const doc = await db.collection('merchants').doc(req.params.merchantId).get();
+    if (!doc.exists) return res.status(404).json({ error: 'غير موجود' });
+    const merchant = doc.data();
+    if (!merchant.pin) return res.status(400).json({ error: 'لم يتم تعيين PIN' });
+    if (merchant.pin !== pin) return res.status(401).json({ error: 'PIN غير صحيح' });
+    res.json({ success: true, name: merchant.name });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 app.get('/merchant/:merchantId', (req, res) => {
   res.sendFile(require('path').join(__dirname, 'public', 'merchant-dashboard.html'));
 });

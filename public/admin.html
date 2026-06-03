@@ -115,6 +115,7 @@ input:focus { border-color: #F5C47A; }
     <div class="modal-title">إضافة تاجر جديد</div>
     <div class="modal-grid">
       <div class="full field"><label>اسم المحل</label><input type="text" id="m-name" placeholder="حدق الشاي" /></div>
+      <div class="field"><label>PIN التاجر (4 أرقام)</label><input type="number" id="m-pin" placeholder="1234" max="9999" min="1000" /></div>
       <div class="field"><label>رقم الجوال</label><input type="tel" id="m-phone" placeholder="05xxxxxxxx" /></div>
       <div class="field"><label>عدد الختمات للهدية</label><input type="number" id="m-stamps" value="4" min="1" max="20" /></div>
       <div class="field"><label>سعر الاشتراك (ريال)</label><input type="number" id="m-price" placeholder="99" /></div>
@@ -235,7 +236,7 @@ async function addMerchant() {
   const res = await fetch('/api/admin/merchants', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-    body: JSON.stringify({ name, phone, color, stampsRequired: stamps, subscriptionPrice: price, subscriptionDate: date })
+    body: JSON.stringify({ name, phone, color, stampsRequired: stamps, subscriptionPrice: price, subscriptionDate: date, pin: document.getElementById("m-pin").value })
   });
   const data = await res.json();
   if (data.merchantId) {
