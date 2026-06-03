@@ -84,6 +84,8 @@ app.post('/api/scan', async (req, res) => {
 app.post('/api/scan-by-code', async (req, res) => {
   try {
     const { code, merchantId } = req.body;
+    const mCheck = await db.collection('merchants').doc(merchantId).get();
+    if (!mCheck.exists || !mCheck.data().active) return res.status(403).json({ error: 'الاشتراك غير فعال' });
     const snapshot = await db.collection('customers').where('shortCode', '==', code).where('merchantId', '==', merchantId).get();
     if (snapshot.empty) return res.status(404).json({ error: 'رقم البطاقة غير موجود' });
     const doc = snapshot.docs[0];
