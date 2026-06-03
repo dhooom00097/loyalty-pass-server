@@ -120,57 +120,45 @@ app.get('/api/pass/:customerId', async (req, res) => {
 const lines = wwdrVal.split('\n'); console.log('WWDR lines:', lines.length, 'first:', lines[0], 'last:', lines[lines.length-1]);
     const certLines = certVal.split('\n'); console.log('CERT lines:', certLines.length, 'first:', certLines[0]);
     const keyLines = keyVal.split('\n'); console.log('KEY lines:', keyLines.length, 'first:', keyLines[0]);
-    // تحميل صور التاجر إذا موجودة
+    // تحميل صور التاجر من Cloudinary
     const passModelPath = path.join(__dirname, 'pass-model.pass');
+    
+    async function downloadImage(url) {
+      return new Promise((resolve, reject) => {
+        const https = require('https');
+        const http = require('http');
+        const client = url.startsWith('https') ? https : http;
+        client.get(url, (res) => {
+          if (res.statusCode === 301 || res.statusCode === 302) {
+            return downloadImage(res.headers.location).then(resolve).catch(reject);
+          }
+          const chunks = [];
+          res.on('data', c => chunks.push(c));
+          res.on('end', () => resolve(Buffer.concat(chunks)));
+          res.on('error', reject);
+        }).on('error', reject);
+      });
+    }
+
     if (merchantDoc.exists) {
       const merchant = merchantDoc.data();
       if (merchant.logoUrl) {
         try {
-          const https = require('https');
-          const logoData = await new Promise((resolve, reject) => {
-            https.get(merchant.logoUrl, (res) => {
-              const chunks = [];
-              res.on('data', c => chunks.push(c));
-              res.on('end', () => resolve(Buffer.concat(chunks)));
-              res.on('error', reject);
-            });
-          });
-          const logo2xData = await new Promise((resolve, reject) => {
-            const url2x = merchant.logoUrl.replace('/upload/', '/upload/w_320,h_100,c_fill/');
-            https.get(url2x, (res) => {
-              const chunks = [];
-              res.on('data', c => chunks.push(c));
-              res.on('end', () => resolve(Buffer.concat(chunks)));
-              res.on('error', reject);
-            });
-          });
+          const logoData = await downloadImage(merchant.logoUrl);
+          const logo2x = await downloadImage(merchant.logoUrl.replace('/upload/', '/upload/w_320,h_100,c_fill/'));
           fs.writeFileSync(path.join(passModelPath, 'logo.png'), logoData);
-          fs.writeFileSync(path.join(passModelPath, 'logo@2x.png'), logo2xData);
-        } catch(e) { console.log('logo load error:', e.message); }
+          fs.writeFileSync(path.join(passModelPath, 'logo@2x.png'), logo2x);
+          console.log('logo loaded ok');
+        } catch(e) { console.log('logo error:', e.message); }
       }
       if (merchant.stripUrl) {
         try {
-          const https = require('https');
-          const stripData = await new Promise((resolve, reject) => {
-            https.get(merchant.stripUrl, (res) => {
-              const chunks = [];
-              res.on('data', c => chunks.push(c));
-              res.on('end', () => resolve(Buffer.concat(chunks)));
-              res.on('error', reject);
-            });
-          });
-          const strip2xData = await new Promise((resolve, reject) => {
-            const url2x = merchant.stripUrl.replace('/upload/', '/upload/w_750,h_288,c_fill/');
-            https.get(url2x, (res) => {
-              const chunks = [];
-              res.on('data', c => chunks.push(c));
-              res.on('end', () => resolve(Buffer.concat(chunks)));
-              res.on('error', reject);
-            });
-          });
+          const stripData = await downloadImage(merchant.stripUrl);
+          const strip2x = await downloadImage(merchant.stripUrl.replace('/upload/', '/upload/w_750,h_288,c_fill/'));
           fs.writeFileSync(path.join(passModelPath, 'strip.png'), stripData);
-          fs.writeFileSync(path.join(passModelPath, 'strip@2x.png'), strip2xData);
-        } catch(e) { console.log('strip load error:', e.message); }
+          fs.writeFileSync(path.join(passModelPath, 'strip@2x.png'), strip2x);
+          console.log('strip loaded ok');
+        } catch(e) { console.log('strip error:', e.message); }
       }
     }
 
