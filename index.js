@@ -245,8 +245,16 @@ app.get('/api/merchant/:merchantId', async (req, res) => {
 
 app.put('/api/merchant/:merchantId', async (req, res) => {
   try {
-    const { name, color, stampsRequired } = req.body;
-    await db.collection('merchants').doc(req.params.merchantId).update({ name, color, stampsRequired });
+    const { name, color, stampsRequired, icon } = req.body;
+    await db.collection('merchants').doc(req.params.merchantId).update({ name, color, stampsRequired, icon });
+    // نرسل push لكل عملاء التاجر
+    const customersSnap = await db.collection('customers').where('merchantId', '==', req.params.merchantId).get();
+    const pushPromises = [];
+    customersSnap.forEach(doc => {
+      const customer = doc.data();
+      if (customer.pushToken) pushPromises.push(sendPushToApple(customer.pushToken).catch(console.error));
+    });
+    await Promise.all(pushPromises);
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
