@@ -10,6 +10,7 @@ const app = express();
 const rateLimit = require('express-rate-limit');
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100, message: { error: 'طلبات كثيرة، انتظر قليلاً' } });
 const scanLimiter = rateLimit({ windowMs: 60 * 1000, max: 30, message: { error: 'طلبات كثيرة' } });
+const pinLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 5, message: { error: 'محاولات كثيرة، انتظر 15 دقيقة' } });
 app.use('/api/admin', limiter);
 app.use('/api/scan', scanLimiter);
 app.use('/api/scan-by-code', scanLimiter);
@@ -321,7 +322,7 @@ app.post('/api/redeem', async (req, res) => {
 
 
 // التحقق من PIN التاجر
-app.post('/api/merchant/:merchantId/verify-pin', async (req, res) => {
+app.post('/api/merchant/:merchantId/verify-pin', pinLimiter, async (req, res) => {
   try {
     const { pin } = req.body;
     const doc = await db.collection('merchants').doc(req.params.merchantId).get();
