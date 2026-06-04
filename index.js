@@ -660,7 +660,7 @@ app.get('/api/google-pass/:customerId', async (req, res) => {
           id: classId,
           issuerName: merchantName,
           programName: 'بطاقة الولاء',
-          programLogo: { sourceUri: { uri: 'https://storage.googleapis.com/wallet-lab-tools-codelab-artifacts-public/pass_google_logo.jpg' } },
+          programLogo: { sourceUri: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png' } },
           reviewStatus: 'UNDER_REVIEW'
         }
       });
