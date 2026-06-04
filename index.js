@@ -270,6 +270,10 @@ app.get('/api/customer/:customerId', async (req, res) => {
 // قائمة عملاء التاجر
 app.get('/api/merchant/:merchantId/customers', async (req, res) => {
   try {
+    const pin = req.headers['x-merchant-pin'] || req.query.pin;
+    const merchantDoc = await db.collection('merchants').doc(req.params.merchantId).get();
+    if (!merchantDoc.exists) return res.status(404).json({ error: 'غير موجود' });
+    if (merchantDoc.data().pin && merchantDoc.data().pin !== pin) return res.status(401).json({ error: 'غير مصرح' });
     const snapshot = await db.collection('customers')
       .where('merchantId', '==', req.params.merchantId)
       .get();
