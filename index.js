@@ -615,3 +615,103 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
     });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
+
+// ===== Google Wallet =====
+const { GoogleAuth } = require('google-auth-library');
+
+const GOOGLE_ISSUER_ID = '3388000000023152531';
+
+function getGoogleAuth() {
+  const keyFile = '/etc/secrets/google-service-account.json';
+  return new GoogleAuth({
+    keyFile,
+    scopes: ['https://www.googleapis.com/auth/wallet_object.issuer']
+  });
+}
+
+app.get('/api/google-pass/:customerId', async (req, res) => {
+  try {
+    const { customerId } = req.params;
+    const customerDoc = await db.collection('customers').doc(customerId).get();
+    if (!customerDoc.exists) return res.status(404).json({ error: 'العميل غير موجود' });
+    const customer = customerDoc.data();
+
+    const merchantDoc = await db.collection('merchants').doc(customer.merchantId).get();
+    const merchantName = merchantDoc.exists ? merchantDoc.data().name : 'بطاقة الولاء';
+    const stampsRequired = merchantDoc.exists ? (merchantDoc.data().stampsRequired || 4) : 4;
+
+    const classId = `${GOOGLE_ISSUER_ID}.loyalty_class`;
+    const objectId = `${GOOGLE_ISSUER_ID}.${customerId}`;
+
+    const auth = getGoogleAuth();
+    const client = await auth.getClient();
+
+    // إنشاء أو تحديث الـ Class
+    try {
+      await client.request({
+        url: `https://walletobjects.googleapis.com/walletobjects/v1/loyaltyClass/${classId}`,
+        method: 'GET'
+      });
+    } catch (e) {
+      await client.request({
+        url: 'https://walletobjects.googleapis.com/walletobjects/v1/loyaltyClass',
+        method: 'POST',
+        data: {
+          id: classId,
+          issuerName: merchantName,
+          programName: 'بطاقة الولاء',
+          programLogo: { sourceUri: { uri: 'https://storage.googleapis.com/wallet-lab-tools-codelab-artifacts-public/pass_google_logo.jpg' } },
+          reviewStatus: 'UNDER_REVIEW'
+        }
+      });
+    }
+
+    // إنشاء أو تحديث الـ Object
+    const loyaltyObject = {
+      id: objectId,
+      classId,
+      state: 'ACTIVE',
+      accountId: customer.shortCode || customerId,
+      accountName: customer.name,
+      loyaltyPoints: {
+        label: 'الختمات',
+        balance: { int: customer.stamps || 0 }
+      },
+      textModulesData: [
+        { header: 'متبقي للهدية', body: String(stampsRequired - (customer.stamps || 0)) },
+        { header: 'هدايا مستلمة', body: String(customer.totalGifts || 0) }
+      ],
+      barcode: { type: 'QR_CODE', value: customerId }
+    };
+
+    try {
+      await client.request({
+        url: `https://walletobjects.googleapis.com/walletobjects/v1/loyaltyObject/${objectId}`,
+        method: 'PUT',
+        data: loyaltyObject
+      });
+    } catch (e) {
+      await client.request({
+        url: 'https://walletobjects.googleapis.com/walletobjects/v1/loyaltyObject',
+        method: 'POST',
+        data: loyaltyObject
+      });
+    }
+
+    // توليد JWT
+    const jwtPayload = {
+      iss: (await auth.getCredentials()).client_email,
+      aud: 'google',
+      typ: 'savetowallet',
+      payload: { loyaltyObjects: [{ id: objectId }] }
+    };
+
+    const token = require('jsonwebtoken').sign(jwtPayload, (await auth.getCredentials()).private_key, { algorithm: 'RS256' });
+    const saveUrl = `https://pay.google.com/gp/v/save/${token}`;
+
+    res.json({ saveUrl });
+  } catch (err) {
+    console.error('Google Wallet Error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
