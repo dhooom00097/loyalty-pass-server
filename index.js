@@ -11,7 +11,7 @@ app.set('trust proxy', 1);
 const rateLimit = require('express-rate-limit');
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100, message: { error: 'طلبات كثيرة، انتظر قليلاً' } });
 const scanLimiter = rateLimit({ windowMs: 60 * 1000, max: 30, message: { error: 'طلبات كثيرة' } });
-const pinLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 5, message: { error: 'محاولات كثيرة، انتظر 15 دقيقة' } });
+const pinLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 3, message: { error: 'محاولات كثيرة، انتظر 15 دقيقة' } });
 app.use('/api/admin', limiter);
 app.use('/api/scan', scanLimiter);
 app.use('/api/scan-by-code', scanLimiter);
