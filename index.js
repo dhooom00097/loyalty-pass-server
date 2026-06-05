@@ -197,6 +197,10 @@ app.get('/api/pass/:customerId', async (req, res) => {
     pass.secondaryFields.push({ key: 'remaining', label: 'متبقي للهدية', value: String(remaining) });
     pass.auxiliaryFields.push({ key: 'gifts', label: 'هدايا مستلمة', value: String(customer.totalGifts || 0) });
     pass.auxiliaryFields.push({ key: 'code', label: 'رقم البطاقة', value: customer.shortCode || '' });
+    if (customer.lastMessage) {
+      pass.backFields = pass.backFields || [];
+      pass.backFields.push({ key: 'msg', label: 'رسالة من المحل', value: customer.lastMessage });
+    }
     pass.setBarcodes({ message: customerId, format: 'PKBarcodeFormatQR', messageEncoding: 'iso-8859-1' });
 
     const buffer = pass.getAsBuffer();
@@ -356,10 +360,18 @@ app.post('/api/merchant/:merchantId/notify', async (req, res) => {
     const promises = [];
     customersSnap.forEach(doc => {
       const customer = doc.data();
-      if (customer.pushToken) {
-        promises.push(sendPushToApple(customer.pushToken, message).catch(console.error));
-        sent++;
-      }
+      // نحدث حقل الرسالة في Firebase عشان Apple تبعث إشعار تحديث
+      promises.push(
+        db.collection('customers').doc(doc.id).update({ 
+          lastMessage: message,
+          lastMessageAt: admin.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+          if (customer.pushToken) {
+            sent++;
+            return sendPushToApple(customer.pushToken).catch(console.error);
+          }
+        })
+      );
     });
     await Promise.all(promises);
     res.json({ success: true, sent });
