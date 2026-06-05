@@ -374,7 +374,8 @@ app.post('/api/merchant/:merchantId/notify', async (req, res) => {
       promises.push(
         db.collection('customers').doc(doc.id).update({ 
           lastMessage: merchantName + ': ' + message,
-          lastMessageAt: admin.firestore.FieldValue.serverTimestamp()
+          lastMessageAt: admin.firestore.FieldValue.serverTimestamp(),
+          relevantDate: new Date(Date.now() + 5000).toISOString()
         }).then(() => {
           if (customer.pushToken) {
             sent++;
