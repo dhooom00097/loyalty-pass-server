@@ -401,7 +401,7 @@ app.post('/v1/devices/:deviceId/registrations/:passType/:serial', async (req, re
     await db.collection('customers').doc(serial).update({
       deviceId,
       pushToken,
-      authToken: 'loyalty2024'
+      authToken: 'loyalty2024secure'
     });
 
     res.status(201).send();
