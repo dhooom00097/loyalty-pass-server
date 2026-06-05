@@ -601,7 +601,7 @@ async function doRedeem() {
 
 // Customers
 async function loadCustomers() {
-  var res = await fetch('/api/merchant/' + merchantId + '/customers');
+  var res = await fetch('/api/merchant/' + merchantId + '/customers', { headers: { 'x-merchant-pin': localStorage.getItem('pin_' + merchantId) || '' } });
   allCustomers = await res.json();
   renderCustomers(allCustomers);
 }
