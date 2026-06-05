@@ -4,53 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>لوحة التاجر</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js">
-async function setGeoLocation() {
-  const msg = document.getElementById('geo-msg').value.trim();
-  const result = document.getElementById('geo-result');
-  if (!navigator.geolocation) { result.textContent = '❌ المتصفح لا يدعم الموقع'; return; }
-  result.textContent = '⏳ جاري تحديد موقعك...';
-  navigator.geolocation.getCurrentPosition(async (pos) => {
-    const lat = pos.coords.latitude;
-    const lng = pos.coords.longitude;
-    try {
-      const res = await fetch('/api/merchant/' + MERCHANT_ID, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lat, lng, geoMessage: msg || 'مرحباً! ختمتك تنتظرك 👋' })
-      });
-      if (res.ok) {
-        result.innerHTML = '✅ تم حفظ الموقع! العملاء الجدد سيحصلون على إشعار تلقائي عند الاقتراب';
-        result.style.color = '#10B981';
-      }
-    } catch(e) { result.textContent = '❌ حدث خطأ'; }
-  }, () => { result.textContent = '❌ لم يتم السماح بالوصول للموقع'; });
-}
-
-async function sendNotify() {
-  const msg = document.getElementById('notify-msg').value.trim();
-  if (!msg) { document.getElementById('notify-result').textContent = '⚠️ اكتب رسالة أولاً'; return; }
-  const btn = document.getElementById('notify-btn');
-  btn.disabled = true; btn.textContent = 'جاري الإرسال...';
-  try {
-    const res = await fetch('/api/merchant/' + MERCHANT_ID + '/notify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: msg, pin: localStorage.getItem('merchantPin') })
-    });
-    const data = await res.json();
-    if (data.success) {
-      document.getElementById('notify-result').innerHTML = '✅ تم الإرسال لـ ' + data.sent + ' عميل';
-      document.getElementById('notify-msg').value = '';
-    } else {
-      document.getElementById('notify-result').textContent = '❌ ' + data.error;
-    }
-  } catch(e) {
-    document.getElementById('notify-result').textContent = '❌ حدث خطأ';
-  }
-  btn.disabled = false; btn.textContent = '📢 إرسال للكل';
-}
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 :root {
@@ -292,10 +246,9 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); color: var
     <div style="padding:20px">
       <div style="font-size:18px;font-weight:700;margin-bottom:8px">📢 إرسال إشعار للعملاء</div>
       <div style="font-size:13px;color:var(--text2);margin-bottom:20px">ارسل رسالة مباشرة لكل عملاءك على جوالهم</div>
-      <textarea id="notify-msg" placeholder="اكتب رسالتك هنا... مثال: عرض خاص اليوم ☕ اشتري واحد واحصل على الثاني مجاناً!" style="width:100%;height:120px;border-radius:12px;border:1.5px solid var(--border);padding:14px;font-family:inherit;font-size:15px;resize:none;background:var(--bg2);color:var(--text);margin-bottom:14px"></textarea>
+      <textarea id="notify-msg" placeholder="اكتب رسالتك هنا..." style="width:100%;height:120px;border-radius:12px;border:1.5px solid var(--border);padding:14px;font-family:inherit;font-size:15px;resize:none;background:var(--bg2);color:var(--text);margin-bottom:14px"></textarea>
       <button id="notify-btn" onclick="sendNotify()" style="width:100%;background:var(--primary);color:#fff;border:none;padding:14px;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit">📢 إرسال للكل</button>
       <div id="notify-result" style="margin-top:14px;text-align:center;font-size:14px;font-weight:600"></div>
-      
       <hr style="margin:24px 0;border:none;border-top:1px solid var(--border)">
       <div style="font-size:16px;font-weight:700;margin-bottom:8px">📍 إشعار تلقائي عند الاقتراب</div>
       <div style="font-size:13px;color:var(--text2);margin-bottom:14px">لما العميل يقرب من محلك تجيه رسالة تلقائية على بطاقته</div>
@@ -304,7 +257,6 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); color: var
       <div id="geo-result" style="margin-top:10px;text-align:center;font-size:13px;font-weight:600"></div>
     </div>
   </div>
-
   <div class="tab-content" id="tab-redeem">
     <div class="redeem-banner" id="redeem-banner">
       <div style="font-size:18px;font-weight:700;color:var(--gold);" id="redeem-text"></div>
@@ -723,6 +675,47 @@ document.getElementById('save-settings-btn').addEventListener('click', async fun
 
 setInterval(function() { document.getElementById('merchant-time').textContent = new Date().toLocaleTimeString('ar-SA'); }, 1000);
 checkPin();
+</script>
+
+<script>
+async function sendNotify() {
+  var msg = document.getElementById('notify-msg').value.trim();
+  if (!msg) { document.getElementById('notify-result').textContent = '⚠️ اكتب رسالة أولاً'; return; }
+  var btn = document.getElementById('notify-btn');
+  btn.disabled = true; btn.textContent = 'جاري الإرسال...';
+  try {
+    var res = await fetch('/api/merchant/' + MERCHANT_ID + '/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: msg, pin: localStorage.getItem('merchantPin') })
+    });
+    var data = await res.json();
+    if (data.success) {
+      document.getElementById('notify-result').innerHTML = '✅ تم الإرسال لـ ' + data.sent + ' عميل';
+      document.getElementById('notify-msg').value = '';
+    } else {
+      document.getElementById('notify-result').textContent = '❌ ' + (data.error || 'خطأ');
+    }
+  } catch(e) { document.getElementById('notify-result').textContent = '❌ حدث خطأ'; }
+  btn.disabled = false; btn.textContent = '📢 إرسال للكل';
+}
+
+async function setGeoLocation() {
+  var msg = document.getElementById('geo-msg').value.trim();
+  var result = document.getElementById('geo-result');
+  if (!navigator.geolocation) { result.textContent = '❌ المتصفح لا يدعم الموقع'; return; }
+  result.textContent = '⏳ جاري تحديد موقعك...';
+  navigator.geolocation.getCurrentPosition(async function(pos) {
+    try {
+      var res = await fetch('/api/merchant/' + MERCHANT_ID, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lat: pos.coords.latitude, lng: pos.coords.longitude, geoMessage: msg || 'مرحباً! ختمتك تنتظرك 👋' })
+      });
+      if (res.ok) { result.innerHTML = '✅ تم حفظ الموقع!'; result.style.color = '#10B981'; }
+    } catch(e) { result.textContent = '❌ حدث خطأ'; }
+  }, function() { result.textContent = '❌ لم يتم السماح بالوصول للموقع'; });
+}
 </script>
 </body>
 </html>
