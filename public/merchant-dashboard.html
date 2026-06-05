@@ -691,7 +691,7 @@ async function sendNotify() {
       body: JSON.stringify({ 
         message: msg, 
         pin: localStorage.getItem('pin_' + merchantId),
-        relevantDate: (document.getElementById('notify-date').value && document.getElementById('notify-time-only').value) ? new Date(document.getElementById('notify-date').value + 'T' + document.getElementById('notify-time-only').value).toISOString() : new Date(Date.now() + 60000).toISOString()
+        relevantDate: new Date(Date.now() + 5000).toISOString()
       })
     });
     var data = await res.json();
