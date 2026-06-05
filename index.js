@@ -204,7 +204,7 @@ app.get('/api/pass/:customerId', async (req, res) => {
       pass.backFields = pass.backFields || [];
       pass.backFields.push({ key: 'msg', label: 'رسالة من المحل', value: customer.lastMessage });
     }
-    pass.setBarcodes({ message: customerId, format: 'PKBarcodeFormatQR', messageEncoding: 'iso-8859-1' });
+    pass.setBarcodes({ message: customerId, format: 'PKBarcodeFormatQR', messageEncoding: 'iso-8859-1', altText: customer.shortCode || '' });
     if (customer.relevantDate) {
       pass.relevantDate = customer.relevantDate;
     }
