@@ -198,13 +198,16 @@ app.get('/api/pass/:customerId', async (req, res) => {
     pass.auxiliaryFields.push({ key: 'gifts', label: 'هدايا مستلمة', value: String(customer.totalGifts || 0) });
     pass.auxiliaryFields.push({ key: 'code', label: 'رقم البطاقة', value: customer.shortCode || '' });
     if (customer.lastMessage) {
+      pass.secondaryFields.push({ key: 'lastmsg', label: 'آخر رسالة', value: customer.lastMessage });
+    }
+    if (customer.lastMessage) {
       pass.backFields = pass.backFields || [];
       pass.backFields.push({ key: 'msg', label: 'رسالة من المحل', value: customer.lastMessage });
     }
     pass.setBarcodes({ message: customerId, format: 'PKBarcodeFormatQR', messageEncoding: 'iso-8859-1' });
 
     const buffer = pass.getAsBuffer();
-    res.set({ 'Content-Type': 'application/vnd.apple.pkpass', 'Content-Transfer-Encoding': 'binary', 'Last-Modified': new Date().toUTCString(), 'Content-Disposition': 'attachment; filename="loyalty.pkpass"' });
+    res.set({ 'Content-Type': 'application/vnd.apple.pkpass', 'Content-Transfer-Encoding': 'binary', 'Last-Modified': customer.lastMessageAt ? new Date(customer.lastMessageAt._seconds * 1000).toUTCString() : new Date().toUTCString(), 'Content-Disposition': 'attachment; filename="loyalty.pkpass"' });
     res.send(buffer);
   } catch (err) { console.error('PASS ERROR FULL:', JSON.stringify({msg: err.message, stack: err.stack, name: err.name})); res.status(500).json({ error: err.message }); }
 });
