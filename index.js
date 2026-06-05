@@ -465,11 +465,12 @@ async function sendPushToApple(pushToken, message = null) {
         ':method': 'POST',
         ':path': `/3/device/${pushToken}`,
         'apns-topic': 'pass.com.alharbi.loyalty',
-        'apns-push-type': 'background',
+        'apns-push-type': 'alert',
+        'apns-priority': '10',
         'content-type': 'application/json'
       });
 
-      req.write(JSON.stringify(message ? { aps: { alert: message, sound: 'default' } } : {}));
+      req.write(JSON.stringify(message ? { aps: { alert: { title: 'بطاقة الولاء', body: message }, sound: 'default' } } : { aps: { 'content-available': 1 } }));
       req.end();
 
       req.on('response', (headers) => {
