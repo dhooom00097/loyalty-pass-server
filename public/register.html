@@ -192,23 +192,6 @@ loadMerchant();
 </script>
 
 <script>
-// Session Timeout - 10 دقائق
-let sessionTimer;
-function resetTimer() {
-  clearTimeout(sessionTimer);
-  sessionTimer = setTimeout(() => {
-    document.body.innerHTML = `
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#0a0a0a;color:#fff;font-family:sans-serif;text-align:center;gap:20px">
-        <div style="font-size:48px">⏰</div>
-        <h2 style="margin:0">انتهت الجلسة</h2>
-        <p style="color:#888;margin:0">لم يتم اكتشاف أي نشاط لمدة 10 دقائق</p>
-        <button onclick="location.reload()" style="background:#6c63ff;color:#fff;border:none;padding:12px 30px;border-radius:10px;font-size:16px;cursor:pointer">تسجيل من جديد</button>
-      </div>
-    `;
-  }, 10 * 60 * 1000);
-}
-['click','keypress','touchstart','scroll'].forEach(e => document.addEventListener(e, resetTimer));
-resetTimer();
 </script>
 </body>
 </html>
