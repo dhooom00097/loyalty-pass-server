@@ -684,7 +684,7 @@ async function sendNotify() {
   var btn = document.getElementById('notify-btn');
   btn.disabled = true; btn.textContent = 'جاري الإرسال...';
   try {
-    var res = await fetch('/api/merchant/' + MERCHANT_ID + '/notify', {
+    var res = await fetch('/api/merchant/' + merchantId + '/notify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: msg, pin: localStorage.getItem('merchantPin') })
@@ -707,7 +707,7 @@ async function setGeoLocation() {
   result.textContent = '⏳ جاري تحديد موقعك...';
   navigator.geolocation.getCurrentPosition(async function(pos) {
     try {
-      var res = await fetch('/api/merchant/' + MERCHANT_ID, {
+      var res = await fetch('/api/merchant/' + merchantId, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ lat: pos.coords.latitude, lng: pos.coords.longitude, geoMessage: msg || 'مرحباً! ختمتك تنتظرك 👋' })
