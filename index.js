@@ -184,6 +184,15 @@ app.get('/api/pass/:customerId', async (req, res) => {
     });
 
     pass.primaryFields.push({ key: 'balance', label: 'الختمات', value: stampsText });
+
+    // geofencing - إشعار لما العميل يقرب من المحل
+    if (merchantDoc.exists && merchantDoc.data().lat && merchantDoc.data().lng) {
+      pass.locations = [{
+        longitude: merchantDoc.data().lng,
+        latitude: merchantDoc.data().lat,
+        relevantText: merchantDoc.data().geoMessage || 'مرحباً! ختمتك تنتظرك 👋'
+      }];
+    }
     pass.secondaryFields.push({ key: 'name', label: 'مرحباً', value: customer.name });
     pass.secondaryFields.push({ key: 'remaining', label: 'متبقي للهدية', value: String(remaining) });
     pass.auxiliaryFields.push({ key: 'gifts', label: 'هدايا مستلمة', value: String(customer.totalGifts || 0) });
