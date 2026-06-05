@@ -332,6 +332,31 @@ app.get('/api/debug-certs', (req, res) => {
   } catch(e) { res.json({ error: e.message }); }
 });
 
+
+// إرسال إشعار لكل عملاء التاجر
+app.post('/api/merchant/:merchantId/notify', async (req, res) => {
+  try {
+    const { message, pin } = req.body;
+    const merchantDoc = await db.collection('merchants').doc(req.params.merchantId).get();
+    if (!merchantDoc.exists) return res.status(404).json({ error: 'التاجر غير موجود' });
+    if (merchantDoc.data().pin && merchantDoc.data().pin !== pin) return res.status(401).json({ error: 'PIN غير صحيح' });
+    if (!message) return res.status(400).json({ error: 'الرسالة مطلوبة' });
+    
+    const customersSnap = await db.collection('customers').where('merchantId', '==', req.params.merchantId).get();
+    let sent = 0;
+    const promises = [];
+    customersSnap.forEach(doc => {
+      const customer = doc.data();
+      if (customer.pushToken) {
+        promises.push(sendPushToApple(customer.pushToken, message).catch(console.error));
+        sent++;
+      }
+    });
+    await Promise.all(promises);
+    res.json({ success: true, sent });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // ===== Apple Wallet Push Notification Endpoints =====
 
 // تسجيل جهاز العميل
@@ -406,7 +431,7 @@ app.get('/v1/devices/:deviceId/registrations/:passType', async (req, res) => {
 });
 
 // ===== إرسال Push Notification لـ Apple =====
-async function sendPushToApple(pushToken) {
+async function sendPushToApple(pushToken, message = null) {
   try {
     const http2 = require('http2');
     const cert = getCert('SIGNER_CERT_BASE64', 'signerCert.pem');
@@ -423,7 +448,7 @@ async function sendPushToApple(pushToken) {
         'content-type': 'application/json'
       });
 
-      req.write(JSON.stringify({}));
+      req.write(JSON.stringify(message ? { aps: { alert: message, sound: 'default' } } : {}));
       req.end();
 
       req.on('response', (headers) => {
