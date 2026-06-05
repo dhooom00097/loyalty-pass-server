@@ -205,6 +205,12 @@ app.get('/api/pass/:customerId', async (req, res) => {
       pass.backFields.push({ key: 'msg', label: 'رسالة من المحل', value: customer.lastMessage });
     }
     pass.setBarcodes({ message: customerId, format: 'PKBarcodeFormatQR', messageEncoding: 'iso-8859-1' });
+    if (customer.relevantDate) {
+      pass.relevantDate = customer.relevantDate;
+    }
+    if (customer.lastMessage) {
+      pass.userInfo = { message: customer.lastMessage };
+    }
 
     const buffer = pass.getAsBuffer();
     res.set({ 'Content-Type': 'application/vnd.apple.pkpass', 'Content-Transfer-Encoding': 'binary', 'Last-Modified': customer.lastMessageAt ? new Date(customer.lastMessageAt._seconds * 1000).toUTCString() : new Date().toUTCString(), 'Content-Disposition': 'attachment; filename="loyalty.pkpass"' });

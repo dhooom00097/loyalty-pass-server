@@ -247,7 +247,11 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); color: var
       <div style="font-size:18px;font-weight:700;margin-bottom:8px">📢 إرسال إشعار للعملاء</div>
       <div style="font-size:13px;color:var(--text2);margin-bottom:20px">ارسل رسالة مباشرة لكل عملاءك على جوالهم</div>
       <textarea id="notify-msg" placeholder="اكتب رسالتك هنا..." style="width:100%;height:120px;border-radius:12px;border:1.5px solid var(--border);padding:14px;font-family:inherit;font-size:15px;resize:none;background:var(--bg2);color:var(--text);margin-bottom:14px"></textarea>
-      <button id="notify-btn" onclick="sendNotify()" style="width:100%;background:var(--primary);color:#fff;border:none;padding:14px;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit">📢 إرسال للكل</button>
+      <div style="margin-bottom:14px">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:8px">⏰ وقت ظهور الإشعار</div>
+      <input id="notify-time" type="datetime-local" style="width:100%;border-radius:12px;border:1.5px solid var(--border);padding:12px 14px;font-family:inherit;font-size:14px;background:var(--bg2);color:var(--text)">
+    </div>
+    <button id="notify-btn" onclick="sendNotify()" style="width:100%;background:var(--primary);color:#fff;border:none;padding:14px;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit">📢 إرسال للكل</button>
       <div id="notify-result" style="margin-top:14px;text-align:center;font-size:14px;font-weight:600"></div>
       <hr style="margin:24px 0;border:none;border-top:1px solid var(--border)">
       <div style="font-size:16px;font-weight:700;margin-bottom:8px">📍 إشعار تلقائي عند الاقتراب</div>
@@ -687,7 +691,11 @@ async function sendNotify() {
     var res = await fetch('/api/merchant/' + merchantId + '/notify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: msg, pin: localStorage.getItem('pin_' + merchantId) })
+      body: JSON.stringify({ 
+        message: msg, 
+        pin: localStorage.getItem('pin_' + merchantId),
+        relevantDate: document.getElementById('notify-time').value ? new Date(document.getElementById('notify-time').value).toISOString() : new Date(Date.now() + 60000).toISOString()
+      })
     });
     var data = await res.json();
     if (data.success) {
