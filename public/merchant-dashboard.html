@@ -698,6 +698,10 @@ async function sendNotify() {
     if (data.success) {
       document.getElementById('notify-result').innerHTML = '✅ تم الإرسال لـ ' + data.sent + ' عميل';
       document.getElementById('notify-msg').value = '';
+    } else if (data.error === 'PIN غير صحيح') {
+      const newPin = prompt('PIN غير صحيح — أدخل PIN الصحيح:');
+      if (newPin) localStorage.setItem('pin_' + merchantId, newPin);
+      document.getElementById('notify-result').textContent = '⚠️ أعد المحاولة';
     } else {
       document.getElementById('notify-result').textContent = '❌ ' + (data.error || 'خطأ');
     }
