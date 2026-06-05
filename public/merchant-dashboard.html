@@ -687,7 +687,7 @@ async function sendNotify() {
     var res = await fetch('/api/merchant/' + merchantId + '/notify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: msg, pin: localStorage.getItem('merchantPin') })
+      body: JSON.stringify({ message: msg, pin: localStorage.getItem('pin_' + merchantId) })
     });
     var data = await res.json();
     if (data.success) {
