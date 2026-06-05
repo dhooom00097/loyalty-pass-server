@@ -11,6 +11,12 @@
   "logoText": "بطاقة الولاء",
   "storeCard": {},
   "barcodes": [
-    { "message": "template", "format": "PKBarcodeFormatQR", "messageEncoding": "iso-8859-1" }
-  ]
+    {
+      "message": "template",
+      "format": "PKBarcodeFormatQR",
+      "messageEncoding": "iso-8859-1"
+    }
+  ],
+  "webServiceURL": "https://loyalty-pass-server.onrender.com",
+  "authenticationToken": "loyalty2024secure"
 }
