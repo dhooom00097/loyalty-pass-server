@@ -363,6 +363,7 @@ app.post('/api/merchant/:merchantId/notify', async (req, res) => {
     if (!merchantDoc.exists) return res.status(404).json({ error: 'التاجر غير موجود' });
     if (merchantDoc.data().pin && merchantDoc.data().pin !== pin) return res.status(401).json({ error: 'PIN غير صحيح' });
     if (!message) return res.status(400).json({ error: 'الرسالة مطلوبة' });
+    const merchantName = merchantDoc.data().name || 'بطاقة الولاء';
     
     const customersSnap = await db.collection('customers').where('merchantId', '==', req.params.merchantId).get();
     let sent = 0;
@@ -372,7 +373,7 @@ app.post('/api/merchant/:merchantId/notify', async (req, res) => {
       // نحدث حقل الرسالة في Firebase عشان Apple تبعث إشعار تحديث
       promises.push(
         db.collection('customers').doc(doc.id).update({ 
-          lastMessage: message,
+          lastMessage: merchantName + ': ' + message,
           lastMessageAt: admin.firestore.FieldValue.serverTimestamp()
         }).then(() => {
           if (customer.pushToken) {
