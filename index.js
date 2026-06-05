@@ -198,7 +198,7 @@ app.get('/api/pass/:customerId', async (req, res) => {
     pass.auxiliaryFields.push({ key: 'gifts', label: 'هدايا مستلمة', value: String(customer.totalGifts || 0) });
     pass.auxiliaryFields.push({ key: 'code', label: 'رقم البطاقة', value: customer.shortCode || '' });
     if (customer.lastMessage) {
-      pass.secondaryFields.push({ key: 'lastmsg', label: 'آخر رسالة', value: customer.lastMessage });
+      pass.secondaryFields.push({ key: 'lastmsg', label: 'آخر رسالة', value: customer.lastMessage, changeMessage: '%@' });
     }
     if (customer.lastMessage) {
       pass.backFields = pass.backFields || [];
