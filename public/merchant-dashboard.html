@@ -783,6 +783,12 @@ function switchAuthRole(role) {
 }
 
 async function checkSavedAuth() {
+  // إخفاء فوري إذا في جلسة محفوظة
+  var saved = localStorage.getItem('auth_' + merchantId);
+  if (saved) {
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('main-app').style.display = 'block';
+  }
   var saved = localStorage.getItem('auth_' + merchantId);
   if (saved) {
     try {
