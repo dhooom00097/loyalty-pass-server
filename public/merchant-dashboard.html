@@ -812,7 +812,7 @@ document.getElementById('manager-login-btn').addEventListener('click', async fun
   if (data.success) {
     localStorage.setItem('auth_' + merchantId, JSON.stringify({ role: 'manager', user: 'مدير', pin }));
     showApp('manager', 'مدير');
-  } else { document.getElementById('manager-error').textContent = 'PIN غير صحيح'; document.getElementById('manager-pin').value = ''; }
+  } else { document.getElementById('manager-error').textContent = 'PIN غير صحيح';; document.getElementById('manager-pin').value = ''; }
 });
 document.getElementById('manager-pin').addEventListener('keypress', function(e) { if (e.key === 'Enter') document.getElementById('manager-login-btn').click(); });
 
@@ -1093,7 +1093,7 @@ async function loadEmployees() {
   el.innerHTML = data.map(function(emp) {
     return '<div class="emp-item"><div class="emp-avatar">' + (emp.name[0]||'م') + '</div>' +
       '<div><div class="emp-name">' + emp.name + '</div><div class="emp-meta">@' + emp.username + '</div></div>' +
-      '<button class="emp-del" onclick="deleteEmployee('' + emp.username + '')">🗑</button></div>';
+      '<button class="emp-del" onclick="delEmp(\'' + emp.username + '\')">🗑</button></div>';
   }).join('');
 }
 
