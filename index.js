@@ -148,10 +148,15 @@ app.get('/api/pass/:customerId', async (req, res) => {
       const merchant = merchantDoc.data();
       if (merchant.logoUrl) {
         try {
+          const sharp = require('sharp');
           const logoData = await downloadImage(merchant.logoUrl);
           const logo2x = await downloadImage(merchant.logoUrl.replace('/upload/', '/upload/w_320,h_100,c_fill/'));
           fs.writeFileSync(path.join(passModelPath, 'logo.png'), logoData);
           fs.writeFileSync(path.join(passModelPath, 'logo@2x.png'), logo2x);
+          // icon من لوجو التاجر
+          await sharp(logoData).resize(29, 29, { fit: 'cover' }).png().toFile(path.join(passModelPath, 'icon.png'));
+          await sharp(logoData).resize(58, 58, { fit: 'cover' }).png().toFile(path.join(passModelPath, 'icon@2x.png'));
+          await sharp(logoData).resize(87, 87, { fit: 'cover' }).png().toFile(path.join(passModelPath, 'icon@3x.png'));
                   } catch(e) { console.log('logo error:', e.message); }
       }
       if (merchant.stripUrl) {
