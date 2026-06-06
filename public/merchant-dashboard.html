@@ -818,7 +818,7 @@ document.getElementById('manager-login-btn').addEventListener('click', async fun
   if (data.success) {
     localStorage.setItem('auth_' + merchantId, JSON.stringify({ role: 'manager', user: 'مدير', pin }));
     showApp('manager', 'مدير');
-  } else { document.getElementById('manager-error').textContent = 'PIN غير صحيح';; document.getElementById('manager-pin').value = ''; }
+  } else { document.getElementById('manager-error').textContent = data.error || 'PIN غير صحيح'; document.getElementById('manager-pin').value = ''; }
 });
 document.getElementById('manager-pin').addEventListener('keypress', function(e) { if (e.key === 'Enter') document.getElementById('manager-login-btn').click(); });
 
