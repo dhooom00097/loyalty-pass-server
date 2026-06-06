@@ -704,7 +704,7 @@ app.delete('/api/merchant/:merchantId/employees/:username', async (req, res) => 
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.post('/api/merchant/:merchantId/verify-employee', pinLimiter,, async (req, res) => {
+app.post('/api/merchant/:merchantId/verify-employee', pinLimiter, async (req, res) => {
   try {
     const { username, password } = req.body;
     const snap = await db.collection('employees').where('merchantId', '==', req.params.merchantId).where('username', '==', username).where('password', '==', password).get();
