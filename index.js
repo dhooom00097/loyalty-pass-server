@@ -664,6 +664,55 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+
+// ===== EMPLOYEES =====
+app.get('/api/merchant/:merchantId/employees', async (req, res) => {
+  try {
+    const pin = req.headers['x-merchant-pin'];
+    const merchantDoc = await db.collection('merchants').doc(req.params.merchantId).get();
+    if (!merchantDoc.exists) return res.status(404).json({ error: 'غير موجود' });
+    if (merchantDoc.data().pin && merchantDoc.data().pin !== pin) return res.status(401).json({ error: 'غير مصرح' });
+    const snap = await db.collection('employees').where('merchantId', '==', req.params.merchantId).get();
+    res.json(snap.docs.map(d => ({ name: d.data().name, username: d.data().username })));
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/merchant/:merchantId/employees', async (req, res) => {
+  try {
+    const pin = req.headers['x-merchant-pin'];
+    const merchantDoc = await db.collection('merchants').doc(req.params.merchantId).get();
+    if (!merchantDoc.exists) return res.status(404).json({ error: 'غير موجود' });
+    if (merchantDoc.data().pin && merchantDoc.data().pin !== pin) return res.status(401).json({ error: 'غير مصرح' });
+    const { name, username, password } = req.body;
+    if (!name || !username || !password) return res.status(400).json({ error: 'بيانات ناقصة' });
+    const existing = await db.collection('employees').where('merchantId', '==', req.params.merchantId).where('username', '==', username).get();
+    if (!existing.empty) return res.status(400).json({ error: 'اسم المستخدم موجود مسبقاً' });
+    await db.collection('employees').add({ merchantId: req.params.merchantId, name, username, password, createdAt: admin.firestore.FieldValue.serverTimestamp() });
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.delete('/api/merchant/:merchantId/employees/:username', async (req, res) => {
+  try {
+    const pin = req.headers['x-merchant-pin'];
+    const merchantDoc = await db.collection('merchants').doc(req.params.merchantId).get();
+    if (!merchantDoc.exists) return res.status(404).json({ error: 'غير موجود' });
+    if (merchantDoc.data().pin && merchantDoc.data().pin !== pin) return res.status(401).json({ error: 'غير مصرح' });
+    const snap = await db.collection('employees').where('merchantId', '==', req.params.merchantId).where('username', '==', req.params.username).get();
+    for (const doc of snap.docs) await doc.ref.delete();
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/merchant/:merchantId/verify-employee', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const snap = await db.collection('employees').where('merchantId', '==', req.params.merchantId).where('username', '==', username).where('password', '==', password).get();
+    if (snap.empty) return res.status(401).json({ error: 'بيانات غير صحيحة' });
+    res.json({ success: true, name: snap.docs[0].data().name });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // ===== Google Wallet =====
 const { GoogleAuth } = require('google-auth-library');
 

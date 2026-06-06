@@ -4,352 +4,757 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>لوحة التاجر</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 :root {
-  --bg: #0f0f13;
-  --surface: #1a1a24;
-  --surface2: #22222f;
-  --border: rgba(255,255,255,0.08);
-  --accent: #6c63ff;
-  --accent2: #a855f7;
-  --text: #f0f0ff;
-  --text2: #8888aa;
-  --success: #22c55e;
-  --danger: #ef4444;
-  --gold: #f59e0b;
+  --bg: #F7F8FA;
+  --white: #FFFFFF;
+  --border: #E8EAED;
+  --border2: #F0F2F5;
+  --text: #111827;
+  --text2: #6B7280;
+  --text3: #9CA3AF;
+  --accent: #2563EB;
+  --accent-light: #EFF6FF;
+  --accent2: #7C3AED;
+  --success: #059669;
+  --success-light: #ECFDF5;
+  --danger: #DC2626;
+  --danger-light: #FEF2F2;
+  --gold: #D97706;
+  --gold-light: #FFFBEB;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.1);
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-xs: 7px;
 }
-body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+body { font-family: 'IBM Plex Sans Arabic', -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
-#pin-screen { position: fixed; inset: 0; background: var(--bg); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; }
-.pin-card { background: var(--surface); border-radius: 28px; padding: 44px 32px; width: 100%; max-width: 360px; border: 1px solid var(--border); text-align: center; box-shadow: 0 24px 80px rgba(108,99,255,0.15); }
-.pin-icon { font-size: 44px; margin-bottom: 16px; }
-.pin-title { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-.pin-sub { font-size: 13px; color: var(--text2); margin-bottom: 32px; }
-.pin-input { width: 100%; background: var(--bg); border: 2px solid var(--border); border-radius: 16px; padding: 18px; font-size: 32px; color: var(--gold); text-align: center; outline: none; font-family: inherit; letter-spacing: 10px; margin-bottom: 16px; transition: border-color 0.2s; }
-.pin-input:focus { border-color: var(--accent); }
-.pin-btn { width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border: none; border-radius: 14px; padding: 16px; font-size: 17px; font-weight: 700; cursor: pointer; font-family: inherit; }
-.pin-error { color: var(--danger); font-size: 13px; margin-top: 12px; min-height: 20px; }
+/* ===== AUTH SCREEN ===== */
+#auth-screen {
+  position: fixed; inset: 0; background: var(--white);
+  z-index: 200; display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.auth-card {
+  width: 100%; max-width: 380px;
+}
+.auth-logo {
+  text-align: center; margin-bottom: 32px;
+}
+.auth-logo-icon {
+  width: 64px; height: 64px; background: var(--accent); border-radius: 18px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 28px; margin-bottom: 12px; box-shadow: 0 8px 24px rgba(37,99,235,0.25);
+}
+.auth-logo-name { font-size: 22px; font-weight: 700; color: var(--text); }
+.auth-logo-sub { font-size: 13px; color: var(--text2); margin-top: 3px; }
 
+.role-tabs {
+  display: flex; background: var(--bg); border-radius: var(--radius-sm);
+  padding: 4px; margin-bottom: 24px; gap: 4px;
+}
+.role-tab {
+  flex: 1; padding: 10px; text-align: center; font-size: 13px; font-weight: 600;
+  color: var(--text2); cursor: pointer; border-radius: var(--radius-xs);
+  border: none; background: transparent; font-family: inherit; transition: all 0.2s;
+}
+.role-tab.active {
+  background: var(--white); color: var(--accent);
+  box-shadow: var(--shadow-sm);
+}
+
+.auth-field { margin-bottom: 14px; }
+.auth-field label { display: block; font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 6px; letter-spacing: 0.03em; text-transform: uppercase; }
+.auth-input {
+  width: 100%; background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); padding: 13px 14px; font-size: 15px;
+  color: var(--text); outline: none; font-family: inherit; transition: border-color 0.2s;
+}
+.auth-input:focus { border-color: var(--accent); background: var(--white); }
+.auth-input.pin-style { font-size: 28px; letter-spacing: 8px; text-align: center; color: var(--accent); font-weight: 700; }
+
+.auth-btn {
+  width: 100%; background: var(--accent); color: #fff; border: none;
+  border-radius: var(--radius-sm); padding: 15px; font-size: 16px; font-weight: 700;
+  cursor: pointer; font-family: inherit; transition: all 0.2s; margin-top: 4px;
+  box-shadow: 0 4px 14px rgba(37,99,235,0.3);
+}
+.auth-btn:active { transform: scale(0.98); }
+.auth-error { color: var(--danger); font-size: 13px; margin-top: 10px; text-align: center; min-height: 18px; }
+.role-badge {
+  display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px;
+  border-radius: 999px; font-size: 11px; font-weight: 600; margin-bottom: 20px;
+}
+.role-badge.manager { background: var(--accent-light); color: var(--accent); }
+.role-badge.employee { background: var(--success-light); color: var(--success); }
+
+/* ===== MAIN APP ===== */
 #main-app { display: none; }
-.header { background: var(--surface); padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-.header-accent { width: 4px; height: 40px; background: linear-gradient(180deg, var(--accent), var(--accent2)); border-radius: 4px; margin-left: 12px; flex-shrink: 0; }
-.header-name { font-size: 20px; font-weight: 700; color: var(--text); }
-.header-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
-.header-btns { display: flex; gap: 8px; }
-.icon-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); width: 38px; height: 38px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-.tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); }
-.tab { flex: 1; padding: 13px 8px; text-align: center; font-size: 12px; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+/* Header */
+.header {
+  background: var(--white); border-bottom: 1px solid var(--border);
+  padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+  position: sticky; top: 0; z-index: 100;
+}
+.header-avatar {
+  width: 40px; height: 40px; border-radius: 12px; background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: white; font-weight: 700; flex-shrink: 0;
+}
+.header-info { flex: 1; min-width: 0; }
+.header-name { font-size: 16px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.header-meta { font-size: 11px; color: var(--text3); margin-top: 1px; display: flex; align-items: center; gap: 6px; }
+.header-role-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+.header-role-dot.manager { background: var(--accent); }
+.header-role-dot.employee { background: var(--success); }
+.header-actions { display: flex; gap: 8px; }
+.hdr-btn {
+  width: 36px; height: 36px; border-radius: 10px; border: 1.5px solid var(--border);
+  background: var(--white); color: var(--text2); font-size: 15px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+}
+.hdr-btn:active { background: var(--bg); }
+
+/* Tabs */
+.tabs {
+  background: var(--white); border-bottom: 1px solid var(--border);
+  display: flex; overflow-x: auto; scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex: 1; min-width: 70px; padding: 12px 8px; text-align: center;
+  font-size: 12px; font-weight: 500; color: var(--text2); cursor: pointer;
+  border-bottom: 2px solid transparent; transition: all 0.2s; white-space: nowrap;
+}
 .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.tab.hidden { display: none; }
 
-.tab-content { display: none; padding: 16px; }
-.tab-content.active { display: block; }
+/* Content */
+.content { padding: 16px; }
 
-.stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-.stat { background: var(--surface); border-radius: 16px; padding: 16px 12px; border: 1px solid var(--border); text-align: center; position: relative; overflow: hidden; }
-.stat::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
-.stat-num { font-size: 26px; font-weight: 700; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.stat-lbl { font-size: 11px; color: var(--text2); margin-top: 4px; }
+/* Stats */
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+.stat-card {
+  background: var(--white); border-radius: var(--radius); padding: 14px 12px;
+  border: 1px solid var(--border); text-align: center;
+}
+.stat-num { font-size: 28px; font-weight: 700; color: var(--accent); line-height: 1; }
+.stat-lbl { font-size: 11px; color: var(--text3); margin-top: 5px; font-weight: 500; }
 
-.scan-toggle { display: flex; background: var(--surface2); border-radius: 14px; padding: 4px; margin-bottom: 16px; gap: 4px; }
-.toggle-btn { flex: 1; padding: 11px 8px; text-align: center; font-size: 13px; font-weight: 600; color: var(--text2); cursor: pointer; border-radius: 10px; border: none; background: transparent; font-family: inherit; transition: all 0.2s; }
-.toggle-btn.active { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; box-shadow: 0 4px 15px rgba(108,99,255,0.3); }
+/* Cards */
+.card {
+  background: var(--white); border-radius: var(--radius); border: 1px solid var(--border);
+  overflow: hidden; margin-bottom: 12px;
+}
+.card-header {
+  padding: 13px 16px; border-bottom: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.card-title { font-size: 13px; font-weight: 600; color: var(--text2); }
 
-.camera-box { background: var(--surface); border-radius: 18px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 16px; }
-.camera-inner { position: relative; display: none; }
-#qr-video { width: 100%; max-height: 270px; object-fit: cover; display: block; }
+/* Scan Toggle */
+.seg-ctrl {
+  display: flex; background: var(--bg); border-radius: var(--radius-sm);
+  padding: 3px; margin-bottom: 12px; gap: 3px;
+}
+.seg-btn {
+  flex: 1; padding: 10px 8px; text-align: center; font-size: 12px; font-weight: 600;
+  color: var(--text2); cursor: pointer; border-radius: var(--radius-xs);
+  border: none; background: transparent; font-family: inherit; transition: all 0.2s;
+}
+.seg-btn.active {
+  background: var(--white); color: var(--accent); box-shadow: var(--shadow-sm);
+}
+
+/* Camera */
+.camera-wrap { position: relative; background: #000; border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 12px; display: none; }
+#qr-video { width: 100%; max-height: 260px; object-fit: cover; display: block; }
 #qr-canvas { display: none; }
-.scan-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; background: rgba(0,0,0,0.3); }
-.scan-frame { width: 175px; height: 175px; border-radius: 16px; position: relative; }
-.scan-frame::before, .scan-frame::after { content: ''; position: absolute; width: 40px; height: 40px; border-color: var(--accent); border-style: solid; }
-.scan-frame::before { top: 0; right: 0; border-width: 3px 3px 0 0; border-radius: 0 12px 0 0; }
-.scan-frame::after { bottom: 0; left: 0; border-width: 0 0 3px 3px; border-radius: 0 0 0 12px; }
-.scan-frame-tl { position: absolute; top: 0; left: 0; width: 40px; height: 40px; border-top: 3px solid var(--accent); border-left: 3px solid var(--accent); border-radius: 12px 0 0 0; }
-.scan-frame-br { position: absolute; bottom: 0; right: 0; width: 40px; height: 40px; border-bottom: 3px solid var(--accent); border-right: 3px solid var(--accent); border-radius: 0 0 12px 0; }
-.scan-line { position: absolute; left: 10%; right: 10%; height: 2px; background: linear-gradient(90deg, transparent, var(--accent), transparent); animation: scanline 2s linear infinite; }
-@keyframes scanline { 0% { top: 10%; } 100% { top: 90%; } }
-.camera-status { padding: 14px 16px; text-align: center; font-size: 13px; color: var(--text2); }
-.camera-btns { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 8px; }
-.start-btn { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border: none; border-radius: 14px; padding: 16px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; }
-.stop-btn { display: none; background: var(--surface2); color: var(--text2); border: 1px solid var(--border); border-radius: 12px; padding: 12px; font-size: 14px; cursor: pointer; font-family: inherit; }
+.scan-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.scan-box { width: 180px; height: 180px; position: relative; }
+.scan-box::before, .scan-box::after,
+.scan-corner-bl, .scan-corner-tr { position: absolute; width: 32px; height: 32px; }
+.scan-box::before { top: 0; right: 0; border-top: 2.5px solid #fff; border-right: 2.5px solid #fff; border-radius: 0 8px 0 0; }
+.scan-box::after { bottom: 0; left: 0; border-bottom: 2.5px solid #fff; border-left: 2.5px solid #fff; border-radius: 0 0 0 8px; }
+.scan-corner-bl { bottom: 0; right: 0; border-bottom: 2.5px solid #fff; border-right: 2.5px solid #fff; border-radius: 0 0 8px 0; }
+.scan-corner-tr { top: 0; left: 0; border-top: 2.5px solid #fff; border-left: 2.5px solid #fff; border-radius: 8px 0 0 0; }
+.scan-line-el {
+  position: absolute; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  animation: scanline 2s linear infinite;
+}
+@keyframes scanline { 0% { top: 0; } 100% { top: 100%; } }
+.camera-status {
+  padding: 12px 16px; font-size: 13px; color: var(--text2); text-align: center;
+  background: var(--white);
+}
 
-.scan-section { background: var(--surface); border-radius: 18px; padding: 20px; border: 1px solid var(--border); margin-bottom: 16px; }
-.scan-label { font-size: 13px; color: var(--text2); margin-bottom: 10px; text-align: center; }
-.code-input { width: 100%; background: var(--bg); border: 2px solid var(--border); border-radius: 14px; padding: 16px; font-size: 26px; font-weight: 700; color: var(--gold); text-align: center; outline: none; font-family: inherit; letter-spacing: 3px; transition: border-color 0.2s; }
-.code-input:focus { border-color: var(--accent); }
-.scan-btn { width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border: none; border-radius: 14px; padding: 16px; font-size: 17px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 12px; transition: opacity 0.2s; }
-.scan-btn:disabled { opacity: 0.4; }
+/* Buttons */
+.btn {
+  width: 100%; border: none; border-radius: var(--radius-sm); padding: 14px;
+  font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit;
+  transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.btn-primary { background: var(--accent); color: #fff; box-shadow: 0 3px 10px rgba(37,99,235,0.25); }
+.btn-primary:active { transform: scale(0.98); }
+.btn-secondary { background: var(--bg); color: var(--text2); border: 1.5px solid var(--border); }
+.btn-success { background: var(--success); color: #fff; }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-sm { padding: 8px 14px; font-size: 13px; border-radius: var(--radius-xs); }
 
-.result-card { display: none; background: var(--surface); border-radius: 18px; padding: 20px; border: 1px solid var(--border); margin-bottom: 16px; text-align: center; }
-.result-name { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
-.result-sub { font-size: 13px; color: var(--success); margin-bottom: 16px; }
-.cups { display: flex; gap: 6px; justify-content: center; margin-bottom: 10px; flex-wrap: wrap; }
-.cup { font-size: 30px; }
-.cup.empty { opacity: 0.2; filter: grayscale(1); }
-.result-text { font-size: 14px; color: var(--gold); }
+/* Inputs */
+.inp {
+  width: 100%; background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); padding: 13px 14px; font-size: 15px;
+  color: var(--text); outline: none; font-family: inherit; transition: border-color 0.2s;
+  margin-bottom: 10px;
+}
+.inp:focus { border-color: var(--accent); background: var(--white); }
+.inp.code { font-size: 28px; font-weight: 700; color: var(--accent); text-align: center; letter-spacing: 4px; }
 
-.gift-banner { display: none; background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.25); border-radius: 18px; padding: 28px 20px; text-align: center; margin-bottom: 16px; }
-.gift-icon { font-size: 52px; margin-bottom: 10px; }
-.gift-text { font-size: 20px; font-weight: 700; color: var(--success); }
+/* Result Cards */
+.result-banner {
+  border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
+  display: none; animation: slideIn 0.3s ease;
+}
+@keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+.result-banner.success { background: var(--success-light); border: 1px solid #A7F3D0; }
+.result-banner.gift { background: var(--gold-light); border: 1px solid #FDE68A; }
+.result-banner.error { background: var(--danger-light); border: 1px solid #FECACA; }
+.result-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.result-sub { font-size: 13px; opacity: 0.8; margin-bottom: 12px; }
+.stamps-row { display: flex; gap: 5px; flex-wrap: wrap; }
+.stamp { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.stamp.filled { background: var(--white); box-shadow: var(--shadow-sm); }
+.stamp.empty { background: rgba(0,0,0,0.05); opacity: 0.4; }
 
-.redeem-banner { display: none; background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); border-radius: 18px; padding: 20px; text-align: center; margin-bottom: 16px; }
-.redeem-btn { width: 100%; background: rgba(34,197,94,0.1); color: var(--success); border: 1px solid rgba(34,197,94,0.25); border-radius: 14px; padding: 16px; font-size: 17px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 10px; }
+/* Inactive */
+.inactive-bar {
+  background: var(--danger-light); border: 1px solid #FECACA; border-radius: var(--radius-sm);
+  padding: 12px 16px; font-size: 13px; font-weight: 600; color: var(--danger);
+  margin-bottom: 12px; text-align: center; display: none;
+}
 
-.recent-section { background: var(--surface); border-radius: 18px; border: 1px solid var(--border); overflow: hidden; }
-.section-label { padding: 14px 18px; font-size: 13px; font-weight: 600; border-bottom: 1px solid var(--border); color: var(--text2); display: flex; align-items: center; gap: 6px; }
-.recent-item { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--border); }
-.avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #fff; flex-shrink: 0; }
-.item-name { font-size: 14px; font-weight: 500; }
+/* Recent List */
+.list-item {
+  display: flex; align-items: center; gap: 12px; padding: 13px 16px;
+  border-bottom: 1px solid var(--border2); transition: background 0.15s;
+}
+.list-item:last-child { border-bottom: none; }
+.list-item:active { background: var(--bg); }
+.avatar {
+  width: 40px; height: 40px; border-radius: 12px; background: var(--accent-light);
+  color: var(--accent); font-size: 16px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.avatar.gift { background: var(--gold-light); color: var(--gold); }
+.item-name { font-size: 14px; font-weight: 600; color: var(--text); }
 .item-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
-.item-time { font-size: 11px; color: var(--text2); margin-right: auto; }
+.item-right { margin-right: auto; text-align: left; }
+.item-time { font-size: 11px; color: var(--text3); }
 
-.search-input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 13px 16px; font-size: 14px; color: var(--text); outline: none; font-family: inherit; margin-bottom: 12px; }
-.search-input:focus { border-color: var(--accent); }
-.customers-list { background: var(--surface); border-radius: 18px; border: 1px solid var(--border); overflow: hidden; }
-.customer-item { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--border); }
-.customer-badges { display: flex; gap: 6px; margin-right: auto; flex-direction: column; align-items: flex-end; }
-.badge { padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
-.badge-stamps { background: rgba(108,99,255,0.12); color: var(--accent); }
-.badge-gifts { background: rgba(34,197,94,0.12); color: var(--success); }
-.empty-state { padding: 32px; text-align: center; color: var(--text2); font-size: 14px; }
-.inactive-banner { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 14px; padding: 14px; text-align: center; margin-bottom: 16px; color: var(--danger); font-weight: 600; font-size: 14px; }
+/* Badges */
+.badge {
+  display: inline-flex; align-items: center; padding: 3px 9px;
+  border-radius: 999px; font-size: 11px; font-weight: 600;
+}
+.badge-blue { background: var(--accent-light); color: var(--accent); }
+.badge-green { background: var(--success-light); color: var(--success); }
+.badge-gold { background: var(--gold-light); color: var(--gold); }
+.badge-red { background: var(--danger-light); color: var(--danger); }
 
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(10px); z-index: 300; align-items: flex-end; justify-content: center; }
-.modal-overlay.show { display: flex; }
-.modal { background: var(--surface); border-radius: 24px 24px 0 0; padding: 28px 20px 44px; width: 100%; max-width: 500px; border-top: 1px solid var(--border); max-height: 88vh; overflow-y: auto; }
-.modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
-.modal-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; text-align: center; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+/* Customers */
+.customer-item {
+  display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+  border-bottom: 1px solid var(--border2);
+}
+.customer-item:last-child { border-bottom: none; }
+.c-info { flex: 1; min-width: 0; }
+.c-name { font-size: 14px; font-weight: 600; }
+.c-meta { font-size: 12px; color: var(--text2); margin-top: 3px; }
+.c-badges { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+
+/* Settings */
+.settings-section { margin-bottom: 20px; }
+.settings-label {
+  font-size: 11px; font-weight: 700; color: var(--text3); letter-spacing: 0.06em;
+  text-transform: uppercase; margin-bottom: 10px; padding: 0 4px;
+}
+.settings-row {
+  background: var(--white); border-radius: var(--radius); border: 1px solid var(--border);
+  overflow: hidden;
+}
+.settings-item {
+  display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+  border-bottom: 1px solid var(--border2); cursor: pointer; transition: background 0.15s;
+}
+.settings-item:last-child { border-bottom: none; }
+.settings-item:active { background: var(--bg); }
+.settings-item-icon {
+  width: 36px; height: 36px; border-radius: 10px; background: var(--accent-light);
+  display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
+}
+.settings-item-text { flex: 1; }
+.settings-item-name { font-size: 14px; font-weight: 500; }
+.settings-item-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.settings-item-arrow { font-size: 12px; color: var(--text3); }
+
+/* Color Presets */
+.color-grid { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.color-opt {
+  width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+  border: 2.5px solid transparent; transition: transform 0.15s;
+}
+.color-opt:hover { transform: scale(1.12); }
+.color-opt.selected { border-color: var(--accent); box-shadow: 0 0 0 2px white, 0 0 0 4px var(--accent); }
+.icon-grid { display: flex; gap: 6px; flex-wrap: wrap; }
+.icon-opt {
+  font-size: 24px; padding: 8px; border-radius: 10px; cursor: pointer;
+  border: 2px solid transparent; transition: all 0.15s;
+}
+.icon-opt:hover { background: var(--bg); }
+.icon-opt.selected { border-color: var(--accent); background: var(--accent-light); }
+
+/* Modal */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(8px); z-index: 300; align-items: flex-end; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--white); border-radius: 22px 22px 0 0; padding: 0;
+  width: 100%; max-width: 520px; max-height: 92vh; overflow-y: auto;
+  animation: slideUp 0.3s cubic-bezier(0.32,0.72,0,1);
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-handle-bar { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto 0; }
+.modal-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+}
+.modal-title { font-size: 17px; font-weight: 700; }
+.modal-close { width: 32px; height: 32px; border-radius: 50%; background: var(--bg); border: none; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+.modal-body { padding: 20px; }
 .field { margin-bottom: 16px; }
-.field label { display: block; font-size: 13px; color: var(--text2); margin-bottom: 8px; }
-.field input[type=text], .field input[type=number] { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 13px 14px; font-size: 15px; color: var(--text); outline: none; font-family: inherit; transition: border-color 0.2s; }
-.field input:focus { border-color: var(--accent); }
-.color-presets { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
-.color-opt { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform 0.15s; }
-.color-opt:hover { transform: scale(1.1); }
-.color-opt.selected { border-color: #fff; box-shadow: 0 0 0 2px var(--accent); }
-.custom-color-row { display: flex; gap: 10px; align-items: center; }
-.custom-color-row input[type=color] { width: 44px; height: 44px; border: none; border-radius: 10px; cursor: pointer; padding: 2px; background: none; }
-.custom-color-row span { font-size: 13px; color: var(--text2); }
-.icon-opts { display: flex; gap: 8px; flex-wrap: wrap; }
-.icon-opt { font-size: 26px; cursor: pointer; padding: 8px; border-radius: 10px; border: 2px solid transparent; transition: all 0.15s; }
-.icon-opt:hover { background: var(--surface2); }
-.icon-opt.selected { border-color: var(--accent); background: rgba(108,99,255,0.12); }
-.file-input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px; color: var(--text); font-family: inherit; font-size: 13px; }
-.img-preview { width: 100%; height: 70px; object-fit: contain; margin-top: 8px; border-radius: 10px; background: var(--bg); display: none; }
-.save-btn { width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border: none; border-radius: 14px; padding: 15px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 8px; }
-.cancel-btn { width: 100%; background: var(--surface2); color: var(--text2); border: none; border-radius: 14px; padding: 13px; font-size: 15px; cursor: pointer; font-family: inherit; margin-top: 8px; }
+.field label { display: block; font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 7px; letter-spacing: 0.03em; }
+
+/* Employees */
+.emp-item {
+  display: flex; align-items: center; gap: 12px; padding: 13px 16px;
+  border-bottom: 1px solid var(--border2);
+}
+.emp-item:last-child { border-bottom: none; }
+.emp-avatar {
+  width: 38px; height: 38px; border-radius: 10px; background: var(--success-light);
+  color: var(--success); font-size: 15px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.emp-name { font-size: 14px; font-weight: 600; }
+.emp-meta { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.emp-del {
+  width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid var(--border);
+  background: transparent; color: var(--danger); font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; margin-right: auto;
+}
+
+/* Notify */
+.notify-wrap { padding: 4px 0; }
+.notify-textarea {
+  width: 100%; min-height: 110px; background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); padding: 14px; font-family: inherit; font-size: 15px;
+  color: var(--text); resize: none; outline: none; margin-bottom: 12px; transition: border-color 0.2s;
+}
+.notify-textarea:focus { border-color: var(--accent); background: var(--white); }
+.section-divider { height: 1px; background: var(--border); margin: 20px 0; }
+.notify-result { text-align: center; font-size: 14px; font-weight: 600; min-height: 20px; padding: 8px 0; }
+
+/* Info box */
+.info-box {
+  background: var(--bg); border-radius: var(--radius-sm); border: 1px solid var(--border);
+  padding: 14px 16px; font-size: 13px; color: var(--text2); line-height: 2;
+}
+
+/* Empty */
+.empty-state { padding: 32px 20px; text-align: center; color: var(--text3); font-size: 14px; }
+.empty-icon { font-size: 36px; margin-bottom: 8px; }
 </style>
 </head>
 <body>
 
-<div id="pin-screen">
-  <div class="pin-card">
-    <div class="pin-icon">🔐</div>
-    <div class="pin-title" id="pin-title">لوحة التاجر</div>
-    <div class="pin-sub">أدخل الـ PIN للدخول</div>
-    <input class="pin-input" type="tel" id="pin-input" maxlength="4" placeholder="••••" />
-    <button class="pin-btn" id="pin-btn">دخول</button>
-    <div class="pin-error" id="pin-error"></div>
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon" id="auth-icon">🏪</div>
+      <div class="auth-logo-name" id="auth-merchant-name">أصيل</div>
+      <div class="auth-logo-sub">لوحة إدارة الولاء</div>
+    </div>
+
+    <div class="role-tabs">
+      <button class="role-tab active" id="tab-manager-auth" onclick="switchAuthRole('manager')">👔 مدير</button>
+      <button class="role-tab" id="tab-employee-auth" onclick="switchAuthRole('employee')">👷 موظف</button>
+    </div>
+
+    <div id="auth-manager-form">
+      <div class="auth-field">
+        <label>رمز PIN</label>
+        <input class="auth-input pin-style" type="tel" id="manager-pin" maxlength="6" placeholder="••••" />
+      </div>
+      <button class="auth-btn" id="manager-login-btn">دخول كمدير</button>
+      <div class="auth-error" id="manager-error"></div>
+    </div>
+
+    <div id="auth-employee-form" style="display:none;">
+      <div class="auth-field">
+        <label>اسم المستخدم</label>
+        <input class="auth-input" type="text" id="emp-username" placeholder="اسم المستخدم" />
+      </div>
+      <div class="auth-field">
+        <label>كلمة المرور</label>
+        <input class="auth-input" type="password" id="emp-password" placeholder="••••••" />
+      </div>
+      <button class="auth-btn" style="background:var(--success);" id="emp-login-btn">دخول كموظف</button>
+      <div class="auth-error" id="emp-error"></div>
+    </div>
   </div>
 </div>
 
+<!-- MAIN APP -->
 <div id="main-app">
   <div class="header">
-    <div style="display:flex;align-items:center;">
-      <div class="header-accent"></div>
-      <div>
-        <div class="header-name" id="merchant-name">جاري التحميل...</div>
-        <div class="header-sub" id="merchant-time">لوحة التاجر</div>
+    <div class="header-avatar" id="hdr-avatar">🏪</div>
+    <div class="header-info">
+      <div class="header-name" id="hdr-name">جاري التحميل...</div>
+      <div class="header-meta">
+        <span class="header-role-dot" id="hdr-role-dot"></span>
+        <span id="hdr-role-label"></span>
+        <span>·</span>
+        <span id="hdr-time"></span>
       </div>
     </div>
-    <div class="header-btns">
-      <button class="icon-btn" id="settings-btn">⚙️</button>
-      <button class="icon-btn" id="logout-btn">🚪</button>
+    <div class="header-actions">
+      <button class="hdr-btn manager-only" id="settings-btn" title="الإعدادات">⚙️</button>
+      <button class="hdr-btn" id="logout-btn" title="خروج">🚪</button>
     </div>
   </div>
 
-  <div class="tabs">
-    <div class="tab active" data-tab="scan">📷 السكان</div>
-    <div class="tab" data-tab="customers">👥 العملاء</div>
+  <div class="tabs" id="main-tabs">
+    <div class="tab active" data-tab="scan">📷 المسح</div>
+    <div class="tab" data-tab="customers" id="tab-customers-btn">👥 العملاء</div>
     <div class="tab" data-tab="redeem">🎁 استرداد</div>
-    <div class="tab" data-tab="notify">📢 إشعار</div>
+    <div class="tab manager-only" data-tab="notify">📢 إشعار</div>
+    <div class="tab manager-only" data-tab="settings-tab">⚙️ الإعدادات</div>
   </div>
 
-  <div class="tab-content active" id="tab-scan">
-    <div id="inactive-banner" class="inactive-banner" style="display:none;">⚠️ الاشتراك غير فعّال — تواصل مع الإدارة</div>
+  <!-- SCAN TAB -->
+  <div class="content" id="tab-scan" style="display:block;">
+    <div class="inactive-bar" id="inactive-bar">⚠️ الاشتراك غير فعّال — تواصل مع الإدارة</div>
 
-    <div class="stats-row">
-      <div class="stat"><div class="stat-num" id="stat-customers">0</div><div class="stat-lbl">عميل</div></div>
-      <div class="stat"><div class="stat-num" id="stat-today">0</div><div class="stat-lbl">اليوم</div></div>
-      <div class="stat"><div class="stat-num" id="stat-stamps">0</div><div class="stat-lbl">ختمة/هدية</div></div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-num" id="stat-customers">0</div>
+        <div class="stat-lbl">عميل</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-today">0</div>
+        <div class="stat-lbl">اليوم</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-stamps">4</div>
+        <div class="stat-lbl">للهدية</div>
+      </div>
     </div>
 
-    <div class="scan-toggle">
-      <button class="toggle-btn active" id="mode-camera-btn" onclick="switchMode('camera')">📷 كاميرا QR</button>
-      <button class="toggle-btn" id="mode-manual-btn" onclick="switchMode('manual')">⌨️ إدخال يدوي</button>
+    <div class="seg-ctrl">
+      <button class="seg-btn active" id="mode-cam" onclick="switchMode('camera')">📷 كاميرا QR</button>
+      <button class="seg-btn" id="mode-manual" onclick="switchMode('manual')">⌨️ إدخال يدوي</button>
     </div>
 
-    <div class="gift-banner" id="gift-banner">
-      <div class="gift-icon">🎁</div>
-      <div class="gift-text" id="gift-name">مبروك!</div>
+    <!-- Result banners -->
+    <div class="result-banner gift" id="gift-banner">
+      <div class="result-name" id="gift-name">🎁 مبروك!</div>
+      <div class="result-sub">العميل حصل على هدية</div>
     </div>
-    <div class="result-card" id="result-card">
+    <div class="result-banner success" id="result-banner">
       <div class="result-name" id="res-name"></div>
-      <div class="result-sub">✓ تم إضافة ختمة</div>
-      <div class="cups" id="res-cups"></div>
-      <div class="result-text" id="res-text"></div>
+      <div class="result-sub">✓ تم إضافة ختمة بنجاح</div>
+      <div class="stamps-row" id="res-stamps"></div>
     </div>
 
+    <!-- Camera -->
     <div id="camera-mode">
-      <div class="camera-box">
-        <div class="camera-inner" id="camera-inner">
+      <div class="card" style="margin-bottom:12px;">
+        <div class="camera-wrap" id="camera-wrap">
           <video id="qr-video" playsinline autoplay muted></video>
           <canvas id="qr-canvas"></canvas>
           <div class="scan-overlay">
-            <div class="scan-frame">
-              <div class="scan-frame-tl"></div>
-              <div class="scan-frame-br"></div>
-              <div class="scan-line"></div>
+            <div class="scan-box">
+              <div class="scan-corner-bl"></div>
+              <div class="scan-corner-tr"></div>
+              <div class="scan-line-el"></div>
             </div>
           </div>
         </div>
         <div class="camera-status" id="camera-status">وجّه الكاميرا على رمز QR في بطاقة العميل</div>
-        <div class="camera-btns">
-          <button class="start-btn" id="start-btn" onclick="startCamera()">📷 تشغيل الكاميرا</button>
-          <button class="stop-btn" id="stop-btn" onclick="stopCamera()">⏹ إيقاف الكاميرا</button>
+        <div style="padding:0 14px 14px; display:flex; gap:8px;">
+          <button class="btn btn-primary" id="start-btn" onclick="startCamera()">📷 تشغيل الكاميرا</button>
+          <button class="btn btn-secondary" id="stop-btn" style="display:none; max-width:100px;" onclick="stopCamera()">إيقاف</button>
         </div>
       </div>
     </div>
 
+    <!-- Manual -->
     <div id="manual-mode" style="display:none;">
-      <div class="scan-section">
-        <div class="scan-label">أدخل رقم بطاقة العميل من الـ Wallet</div>
-        <input class="code-input" id="code-input" type="tel" placeholder="0000000" />
-        <button class="scan-btn" id="scan-btn">✓ إضافة ختمة</button>
+      <div class="card" style="margin-bottom:12px; padding:16px;">
+        <div style="font-size:13px;color:var(--text2);margin-bottom:10px;text-align:center;">أدخل رقم بطاقة العميل</div>
+        <input class="inp code" id="code-input" type="tel" placeholder="0000000" />
+        <button class="btn btn-primary" id="scan-btn">✓ إضافة ختمة</button>
       </div>
     </div>
 
-    <div class="recent-section">
-      <div class="section-label">⏱ آخر العمليات</div>
-      <div id="recent-list"><div class="empty-state">لا توجد عمليات بعد</div></div>
-    </div>
-  </div>
-
-  <div class="tab-content" id="tab-customers">
-    <input class="search-input" id="search-input" type="text" placeholder="🔍 ابحث باسم أو رقم البطاقة..." />
-    <div class="customers-list" id="customers-list"><div class="empty-state">جاري التحميل...</div></div>
-  </div>
-
-  <div class="tab-content" id="tab-notify">
-    <div style="padding:20px">
-      <div style="font-size:18px;font-weight:700;margin-bottom:8px">📢 إرسال إشعار للعملاء</div>
-      <div style="font-size:13px;color:var(--text2);margin-bottom:20px">ارسل رسالة مباشرة لكل عملاءك على جوالهم</div>
-      <textarea id="notify-msg" placeholder="اكتب رسالتك هنا..." style="width:100%;height:120px;border-radius:12px;border:1.5px solid var(--border);padding:14px;font-family:inherit;font-size:15px;resize:none;background:var(--bg2);color:var(--text);margin-bottom:14px"></textarea>
-      
-    <button id="notify-btn" onclick="sendNotify()" style="width:100%;background:var(--primary);color:#fff;border:none;padding:14px;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit">📢 إرسال للكل</button>
-      <div id="notify-result" style="margin-top:14px;text-align:center;font-size:14px;font-weight:600"></div>
-      <hr style="margin:24px 0;border:none;border-top:1px solid var(--border)">
-      <div style="font-size:16px;font-weight:700;margin-bottom:8px">📍 إشعار تلقائي عند الاقتراب</div>
-      <div style="font-size:13px;color:var(--text2);margin-bottom:14px">لما العميل يقرب من محلك تجيه رسالة تلقائية على بطاقته</div>
-      <input id="geo-msg" type="text" placeholder="مثال: مرحباً! ختمتك تنتظرك ☕" style="width:100%;border-radius:12px;border:1.5px solid var(--border);padding:12px 14px;font-family:inherit;font-size:14px;background:var(--bg2);color:var(--text);margin-bottom:10px">
-      <button onclick="setGeoLocation()" style="width:100%;background:#10B981;color:#fff;border:none;padding:13px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">📍 استخدم موقعي الحالي</button>
-      <div id="geo-result" style="margin-top:10px;text-align:center;font-size:13px;font-weight:600"></div>
-    </div>
-  </div>
-  <div class="tab-content" id="tab-redeem">
-    <div class="redeem-banner" id="redeem-banner">
-      <div style="font-size:18px;font-weight:700;color:var(--gold);" id="redeem-text"></div>
-      <div style="font-size:13px;color:var(--text2);margin-top:6px;" id="redeem-sub"></div>
-    </div>
-    <div class="scan-section">
-      <div class="scan-label">أدخل رقم البطاقة لاسترداد هدية</div>
-      <input class="code-input" id="redeem-input" type="tel" placeholder="0000000" />
-      <button class="redeem-btn" id="redeem-btn">🎁 استرداد هدية</button>
-    </div>
-    <div style="background:var(--surface);border-radius:14px;padding:16px;border:1px solid var(--border);margin-top:4px;">
-      <div style="font-size:13px;color:var(--text2);line-height:2.2;">
-        <div>• العميل يحصل على هدية بعد <span id="info-stamps" style="color:var(--gold);font-weight:700;">4</span> ختمات</div>
-        <div>• استرداد الهدية ينقص من رصيد العميل</div>
-        <div>• البطاقة تتحدث تلقائياً في Apple Wallet</div>
+    <!-- Recent -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">آخر العمليات</span>
       </div>
+      <div id="recent-list"><div class="empty-state"><div class="empty-icon">🕐</div>لا توجد عمليات بعد</div></div>
+    </div>
+  </div>
+
+  <!-- CUSTOMERS TAB -->
+  <div class="content" id="tab-customers" style="display:none;">
+    <input class="inp" id="search-input" type="text" placeholder="🔍 ابحث بالاسم أو رقم البطاقة..." style="margin-bottom:12px;" />
+    <div class="card" id="customers-list">
+      <div class="empty-state"><div class="empty-icon">👥</div>جاري التحميل...</div>
+    </div>
+  </div>
+
+  <!-- REDEEM TAB -->
+  <div class="content" id="tab-redeem" style="display:none;">
+    <div class="result-banner success" id="redeem-success" style="margin-bottom:12px;">
+      <div class="result-name" id="redeem-success-text"></div>
+      <div class="result-sub" id="redeem-success-sub"></div>
+    </div>
+    <div class="card" style="padding:16px; margin-bottom:12px;">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:10px;text-align:center;">أدخل رقم البطاقة لاسترداد هدية</div>
+      <input class="inp code" id="redeem-input" type="tel" placeholder="0000000" />
+      <button class="btn btn-success" id="redeem-btn">🎁 استرداد هدية</button>
+    </div>
+    <div class="info-box">
+      <div>• العميل يحصل على هدية بعد <span id="info-stamps" style="color:var(--gold);font-weight:700;">4</span> ختمات</div>
+      <div>• استرداد الهدية ينقص من رصيد الهدايا</div>
+      <div>• البطاقة تتحدث تلقائياً في Apple Wallet</div>
+    </div>
+  </div>
+
+  <!-- NOTIFY TAB (manager only) -->
+  <div class="content" id="tab-notify" style="display:none;">
+    <div class="card" style="padding:16px; margin-bottom:12px;">
+      <div style="font-size:16px;font-weight:700;margin-bottom:6px;">📢 إرسال إشعار للعملاء</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:14px;">رسالة مباشرة لكل عملاءك على جوالهم</div>
+      <textarea class="notify-textarea" id="notify-msg" placeholder="اكتب رسالتك هنا..."></textarea>
+      <button class="btn btn-primary" id="notify-btn" onclick="sendNotify()">📢 إرسال للكل</button>
+      <div class="notify-result" id="notify-result"></div>
+    </div>
+    <div class="section-divider"></div>
+    <div class="card" style="padding:16px;">
+      <div style="font-size:15px;font-weight:700;margin-bottom:6px;">📍 إشعار تلقائي عند الاقتراب</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:12px;">لما العميل يقرب من محلك تجيه رسالة تلقائية</div>
+      <input class="inp" id="geo-msg" type="text" placeholder="مثال: مرحباً! ختمتك تنتظرك ☕" style="margin-bottom:10px;" />
+      <button class="btn btn-success" onclick="setGeoLocation()">📍 استخدم موقعي الحالي</button>
+      <div class="notify-result" id="geo-result"></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS TAB (manager only) -->
+  <div class="content" id="tab-settings-tab" style="display:none;">
+
+    <!-- Shop Settings -->
+    <div class="settings-section">
+      <div class="settings-label">إعدادات المحل</div>
+      <div class="settings-row">
+        <div class="settings-item" onclick="openModal('shop-modal')">
+          <div class="settings-item-icon">🏪</div>
+          <div class="settings-item-text">
+            <div class="settings-item-name">معلومات المحل</div>
+            <div class="settings-item-sub">الاسم، اللون، الأيقونة، الختمات</div>
+          </div>
+          <span class="settings-item-arrow">›</span>
+        </div>
+        <div class="settings-item" onclick="openModal('images-modal')">
+          <div class="settings-item-icon">🖼️</div>
+          <div class="settings-item-text">
+            <div class="settings-item-name">صور البطاقة</div>
+            <div class="settings-item-sub">اللوجو وصورة الخلفية</div>
+          </div>
+          <span class="settings-item-arrow">›</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Employees -->
+    <div class="settings-section">
+      <div class="settings-label">إدارة الموظفين</div>
+      <div class="card">
+        <div id="employees-list">
+          <div class="empty-state"><div class="empty-icon">👷</div>لا يوجد موظفون بعد</div>
+        </div>
+        <div style="padding:12px 16px; border-top:1px solid var(--border2);">
+          <button class="btn btn-primary btn-sm" onclick="openModal('add-emp-modal')" style="width:auto; padding:10px 20px;">+ إضافة موظف</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PIN Change -->
+    <div class="settings-section">
+      <div class="settings-label">الأمان</div>
+      <div class="settings-row">
+        <div class="settings-item" onclick="openModal('pin-modal')">
+          <div class="settings-item-icon">🔐</div>
+          <div class="settings-item-text">
+            <div class="settings-item-name">تغيير PIN المدير</div>
+            <div class="settings-item-sub">رمز الدخول الخاص بك</div>
+          </div>
+          <span class="settings-item-arrow">›</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:20px;"></div>
+  </div>
+</div>
+
+<!-- MODALS -->
+
+<!-- Shop Modal -->
+<div class="modal-overlay" id="shop-modal">
+  <div class="modal">
+    <div class="modal-handle-bar"></div>
+    <div class="modal-hdr">
+      <span class="modal-title">معلومات المحل</span>
+      <button class="modal-close" onclick="closeModal('shop-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field"><label>اسم المحل</label><input class="inp" type="text" id="s-name" /></div>
+      <div class="field">
+        <label>لون البطاقة</label>
+        <div class="color-grid">
+          <div class="color-opt selected" style="background:#1e3a5f" data-color="rgb(30,58,95)"></div>
+          <div class="color-opt" style="background:#14532d" data-color="rgb(20,83,45)"></div>
+          <div class="color-opt" style="background:#4c1d95" data-color="rgb(76,29,149)"></div>
+          <div class="color-opt" style="background:#7c2d12" data-color="rgb(124,45,18)"></div>
+          <div class="color-opt" style="background:#0f172a" data-color="rgb(15,23,42)"></div>
+          <div class="color-opt" style="background:#134e4a" data-color="rgb(19,78,74)"></div>
+          <div class="color-opt" style="background:#3b0764" data-color="rgb(59,7,100)"></div>
+          <div class="color-opt" style="background:#851109" data-color="rgb(133,17,9)"></div>
+          <div class="color-opt" style="background:#0c1445" data-color="rgb(12,20,69)"></div>
+          <div class="color-opt" style="background:#2d1b69" data-color="rgb(45,27,105)"></div>
+          <div class="color-opt" style="background:#1f2937" data-color="rgb(31,41,55)"></div>
+          <div class="color-opt" style="background:#713f12" data-color="rgb(113,63,18)"></div>
+          <div class="color-opt" style="background:#881337" data-color="rgb(136,19,55)"></div>
+          <div class="color-opt" style="background:#164e63" data-color="rgb(22,78,99)"></div>
+          <div class="color-opt" style="background:#365314" data-color="rgb(54,83,20)"></div>
+          <div class="color-opt" style="background:#1a0533" data-color="rgb(26,5,51)"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
+          <input type="color" id="custom-color" value="#1e3a5f" style="width:42px;height:42px;border:none;border-radius:10px;cursor:pointer;padding:2px;background:none;" />
+          <span style="font-size:13px;color:var(--text2);">لون مخصص</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>أيقونة المحل</label>
+        <div class="icon-grid">
+          <span class="icon-opt selected" data-icon="☕">☕</span>
+          <span class="icon-opt" data-icon="🚗">🚗</span>
+          <span class="icon-opt" data-icon="🍕">🍕</span>
+          <span class="icon-opt" data-icon="💇">💇</span>
+          <span class="icon-opt" data-icon="🛒">🛒</span>
+          <span class="icon-opt" data-icon="💊">💊</span>
+          <span class="icon-opt" data-icon="👗">👗</span>
+          <span class="icon-opt" data-icon="🍔">🍔</span>
+          <span class="icon-opt" data-icon="🧁">🧁</span>
+          <span class="icon-opt" data-icon="💈">💈</span>
+          <span class="icon-opt" data-icon="🏋️">🏋️</span>
+          <span class="icon-opt" data-icon="📚">📚</span>
+          <span class="icon-opt" data-icon="🌿">🌿</span>
+          <span class="icon-opt" data-icon="⭐">⭐</span>
+          <span class="icon-opt" data-icon="🎯">🎯</span>
+          <span class="icon-opt" data-icon="💎">💎</span>
+        </div>
+      </div>
+      <div class="field"><label>عدد الختمات للهدية</label><input class="inp" type="number" id="s-stamps" min="1" max="20" /></div>
+      <button class="btn btn-primary" id="save-shop-btn">حفظ التغييرات</button>
+      <button class="btn btn-secondary" onclick="closeModal('shop-modal')" style="margin-top:8px;">إلغاء</button>
     </div>
   </div>
 </div>
 
-<div class="modal-overlay" id="settings-modal">
+<!-- Images Modal -->
+<div class="modal-overlay" id="images-modal">
   <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">⚙️ إعدادات المحل</div>
-    <div class="field"><label>اسم المحل</label><input type="text" id="s-name" /></div>
-    <div class="field">
-      <label>لون البطاقة</label>
-      <div class="color-presets">
-        <div class="color-opt selected" style="background:#851109" data-color="rgb(133,17,9)"></div>
-        <div class="color-opt" style="background:#1e3a5f" data-color="rgb(30,58,95)"></div>
-        <div class="color-opt" style="background:#14532d" data-color="rgb(20,83,45)"></div>
-        <div class="color-opt" style="background:#4c1d95" data-color="rgb(76,29,149)"></div>
-        <div class="color-opt" style="background:#1e1b4b" data-color="rgb(30,27,75)"></div>
-        <div class="color-opt" style="background:#7c2d12" data-color="rgb(124,45,18)"></div>
-        <div class="color-opt" style="background:#0f172a" data-color="rgb(15,23,42)"></div>
-        <div class="color-opt" style="background:#134e4a" data-color="rgb(19,78,74)"></div>
-        <div class="color-opt" style="background:#3b0764" data-color="rgb(59,7,100)"></div>
-        <div class="color-opt" style="background:#1c1917" data-color="rgb(28,25,23)"></div>
-        <div class="color-opt" style="background:#450a0a" data-color="rgb(69,10,10)"></div>
-        <div class="color-opt" style="background:#052e16" data-color="rgb(5,46,22)"></div>
-        <div class="color-opt" style="background:#0c1445" data-color="rgb(12,20,69)"></div>
-        <div class="color-opt" style="background:#2d1b69" data-color="rgb(45,27,105)"></div>
-        <div class="color-opt" style="background:#1f2937" data-color="rgb(31,41,55)"></div>
-        <div class="color-opt" style="background:#312e81" data-color="rgb(49,46,129)"></div>
-        <div class="color-opt" style="background:#164e63" data-color="rgb(22,78,99)"></div>
-        <div class="color-opt" style="background:#365314" data-color="rgb(54,83,20)"></div>
-        <div class="color-opt" style="background:#713f12" data-color="rgb(113,63,18)"></div>
-        <div class="color-opt" style="background:#881337" data-color="rgb(136,19,55)"></div>
-        <div class="color-opt" style="background:#0a0a0a" data-color="rgb(10,10,10)"></div>
-        <div class="color-opt" style="background:#1a0533" data-color="rgb(26,5,51)"></div>
-        <div class="color-opt" style="background:#0d3b2e" data-color="rgb(13,59,46)"></div>
-        <div class="color-opt" style="background:#2c1810" data-color="rgb(44,24,16)"></div>
+    <div class="modal-handle-bar"></div>
+    <div class="modal-hdr">
+      <span class="modal-title">صور البطاقة</span>
+      <button class="modal-close" onclick="closeModal('images-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>لوجو المحل</label>
+        <input type="file" class="inp" id="logo-file" accept="image/*" style="padding:10px;" />
+        <img id="logo-preview" style="width:100%;max-height:70px;object-fit:contain;margin-top:8px;border-radius:10px;background:var(--bg);display:none;" />
       </div>
-      <div class="custom-color-row" style="margin-top:10px;">
-        <input type="color" id="custom-color" value="#851109" />
-        <span>لون مخصص</span>
+      <div class="field">
+        <label>صورة البطاقة (Strip)</label>
+        <input type="file" class="inp" id="strip-file" accept="image/*" style="padding:10px;" />
+        <img id="strip-preview" style="width:100%;height:90px;object-fit:cover;margin-top:8px;border-radius:10px;display:none;" />
       </div>
+      <button class="btn btn-primary" id="save-images-btn">رفع الصور</button>
+      <button class="btn btn-secondary" onclick="closeModal('images-modal')" style="margin-top:8px;">إلغاء</button>
     </div>
-    <div class="field">
-      <label>أيقونة المحل</label>
-      <div class="icon-opts">
-        <span class="icon-opt selected" data-icon="☕">☕</span>
-        <span class="icon-opt" data-icon="🚗">🚗</span>
-        <span class="icon-opt" data-icon="🍕">🍕</span>
-        <span class="icon-opt" data-icon="💇">💇</span>
-        <span class="icon-opt" data-icon="🛒">🛒</span>
-        <span class="icon-opt" data-icon="💊">💊</span>
-        <span class="icon-opt" data-icon="👗">👗</span>
-        <span class="icon-opt" data-icon="🍔">🍔</span>
-        <span class="icon-opt" data-icon="🧁">🧁</span>
-        <span class="icon-opt" data-icon="💈">💈</span>
-        <span class="icon-opt" data-icon="🏋️">🏋️</span>
-        <span class="icon-opt" data-icon="📚">📚</span>
-        <span class="icon-opt" data-icon="💻">💻</span>
-        <span class="icon-opt" data-icon="🎮">🎮</span>
-        <span class="icon-opt" data-icon="🌿">🌿</span>
-        <span class="icon-opt" data-icon="⭐">⭐</span>
+  </div>
+</div>
+
+<!-- Add Employee Modal -->
+<div class="modal-overlay" id="add-emp-modal">
+  <div class="modal">
+    <div class="modal-handle-bar"></div>
+    <div class="modal-hdr">
+      <span class="modal-title">إضافة موظف</span>
+      <button class="modal-close" onclick="closeModal('add-emp-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field"><label>اسم الموظف</label><input class="inp" type="text" id="emp-name-input" placeholder="مثال: محمد" /></div>
+      <div class="field"><label>اسم المستخدم</label><input class="inp" type="text" id="emp-user-input" placeholder="مثال: mohammed123" /></div>
+      <div class="field"><label>كلمة المرور</label><input class="inp" type="text" id="emp-pass-input" placeholder="كلمة مرور للموظف" /></div>
+      <div class="info-box" style="margin-bottom:16px;font-size:12px;">
+        الموظف يستطيع: مسح QR وإضافة ختمات، استرداد الهدايا، عرض العملاء.<br/>
+        لا يستطيع: الإعدادات، إرسال الإشعارات، إضافة موظفين.
       </div>
+      <button class="btn btn-primary" id="save-emp-btn">إضافة الموظف</button>
+      <button class="btn btn-secondary" onclick="closeModal('add-emp-modal')" style="margin-top:8px;">إلغاء</button>
     </div>
-    <div class="field"><label>عدد الختمات للهدية</label><input type="number" id="s-stamps" min="1" max="20" /></div>
-    <div class="field">
-      <label>لوجو المحل</label>
-      <input type="file" class="file-input" id="logo-file" accept="image/*" />
-      <img class="img-preview" id="logo-preview" />
+  </div>
+</div>
+
+<!-- PIN Modal -->
+<div class="modal-overlay" id="pin-modal">
+  <div class="modal">
+    <div class="modal-handle-bar"></div>
+    <div class="modal-hdr">
+      <span class="modal-title">تغيير PIN المدير</span>
+      <button class="modal-close" onclick="closeModal('pin-modal')">✕</button>
     </div>
-    <div class="field">
-      <label>صورة البطاقة (strip)</label>
-      <input type="file" class="file-input" id="strip-file" accept="image/*" />
-      <img class="img-preview" id="strip-preview" style="height:90px;object-fit:cover;" />
+    <div class="modal-body">
+      <div class="field"><label>PIN الجديد</label><input class="inp" type="tel" id="new-pin-input" maxlength="6" placeholder="••••" style="text-align:center;letter-spacing:8px;font-size:28px;font-weight:700;color:var(--accent);" /></div>
+      <button class="btn btn-primary" id="save-pin-btn">حفظ PIN الجديد</button>
+      <button class="btn btn-secondary" onclick="closeModal('pin-modal')" style="margin-top:8px;">إلغاء</button>
     </div>
-    <button class="save-btn" id="save-settings-btn">حفظ التغييرات</button>
-    <button class="cancel-btn" id="cancel-settings-btn">إلغاء</button>
   </div>
 </div>
 
@@ -359,81 +764,137 @@ var merchantData = {};
 var allCustomers = [];
 var recentOps = [];
 var scansToday = 0;
-var selectedColor = 'rgb(133,17,9)';
+var selectedColor = 'rgb(30,58,95)';
 var selectedIcon = '☕';
 var videoStream = null;
 var scannerActive = false;
 var lastScanned = '';
 var lastScannedTime = 0;
+var currentRole = 'manager'; // 'manager' or 'employee'
+var currentUser = '';
 
-// PIN
-document.getElementById('pin-btn').addEventListener('click', verifyPin);
-document.getElementById('pin-input').addEventListener('keypress', function(e) { if (e.key === 'Enter') verifyPin(); });
+// ===== AUTH =====
+function switchAuthRole(role) {
+  currentRole = role;
+  document.getElementById('tab-manager-auth').classList.toggle('active', role === 'manager');
+  document.getElementById('tab-employee-auth').classList.toggle('active', role === 'employee');
+  document.getElementById('auth-manager-form').style.display = role === 'manager' ? 'block' : 'none';
+  document.getElementById('auth-employee-form').style.display = role === 'employee' ? 'block' : 'none';
+}
 
-async function checkPin() {
-  var saved = localStorage.getItem('pin_' + merchantId);
-  if (saved) { showApp(); return; }
+async function checkSavedAuth() {
+  var saved = localStorage.getItem('auth_' + merchantId);
+  if (saved) {
+    try {
+      var auth = JSON.parse(saved);
+      currentRole = auth.role;
+      currentUser = auth.user || '';
+      var res = await fetch('/api/merchant/' + merchantId);
+      var data = await res.json();
+      if (data.name) { document.getElementById('auth-merchant-name').textContent = data.name; document.getElementById('auth-icon').textContent = data.icon || '🏪'; }
+      showApp(auth.role, auth.user);
+    } catch(e) { localStorage.removeItem('auth_' + merchantId); }
+    return;
+  }
   var res = await fetch('/api/merchant/' + merchantId);
   var data = await res.json();
-  if (data.name) document.getElementById('pin-title').textContent = data.name;
+  if (data.name) { document.getElementById('auth-merchant-name').textContent = data.name; document.getElementById('auth-icon').textContent = data.icon || '🏪'; }
 }
 
-async function verifyPin() {
-  var pin = document.getElementById('pin-input').value.trim();
-  if (pin.length < 4) { document.getElementById('pin-error').textContent = 'أدخل 4 أرقام'; return; }
+document.getElementById('manager-login-btn').addEventListener('click', async function() {
+  var pin = document.getElementById('manager-pin').value.trim();
+  if (pin.length < 4) { document.getElementById('manager-error').textContent = 'أدخل PIN صحيح'; return; }
   var res = await fetch('/api/merchant/' + merchantId + '/verify-pin', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ pin: pin })
+    body: JSON.stringify({ pin })
   });
   var data = await res.json();
-  if (data.success) { localStorage.setItem('pin_' + merchantId, pin); showApp(); }
-  else { document.getElementById('pin-error').textContent = data.error || 'PIN غير صحيح'; document.getElementById('pin-input').value = ''; }
-}
+  if (data.success) {
+    localStorage.setItem('auth_' + merchantId, JSON.stringify({ role: 'manager', user: 'مدير', pin }));
+    showApp('manager', 'مدير');
+  } else { document.getElementById('manager-error').textContent = 'PIN غير صحيح'; document.getElementById('manager-pin').value = ''; }
+});
+document.getElementById('manager-pin').addEventListener('keypress', function(e) { if (e.key === 'Enter') document.getElementById('manager-login-btn').click(); });
 
-function showApp() {
-  document.getElementById('pin-screen').style.display = 'none';
+document.getElementById('emp-login-btn').addEventListener('click', async function() {
+  var username = document.getElementById('emp-username').value.trim();
+  var password = document.getElementById('emp-password').value.trim();
+  if (!username || !password) { document.getElementById('emp-error').textContent = 'أدخل اسم المستخدم وكلمة المرور'; return; }
+  var res = await fetch('/api/merchant/' + merchantId + '/verify-employee', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  });
+  var data = await res.json();
+  if (data.success) {
+    localStorage.setItem('auth_' + merchantId, JSON.stringify({ role: 'employee', user: data.name || username }));
+    showApp('employee', data.name || username);
+  } else { document.getElementById('emp-error').textContent = data.error || 'بيانات غير صحيحة'; }
+});
+document.getElementById('emp-password').addEventListener('keypress', function(e) { if (e.key === 'Enter') document.getElementById('emp-login-btn').click(); });
+
+function showApp(role, user) {
+  currentRole = role;
+  currentUser = user;
+  document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('main-app').style.display = 'block';
+
+  // Apply role UI
+  var isManager = role === 'manager';
+  document.querySelectorAll('.manager-only').forEach(function(el) {
+    el.style.display = isManager ? '' : 'none';
+  });
+
+  // Header role indicator
+  document.getElementById('hdr-role-dot').className = 'header-role-dot ' + role;
+  document.getElementById('hdr-role-label').textContent = isManager ? 'مدير' : ('موظف · ' + user);
+
   loadMerchant();
 }
 
 document.getElementById('logout-btn').addEventListener('click', function() {
   stopCamera();
-  localStorage.removeItem('pin_' + merchantId);
+  localStorage.removeItem('auth_' + merchantId);
   document.getElementById('main-app').style.display = 'none';
-  document.getElementById('pin-screen').style.display = 'flex';
-  document.getElementById('pin-input').value = '';
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('manager-pin').value = '';
+  document.getElementById('emp-username').value = '';
+  document.getElementById('emp-password').value = '';
 });
 
-// Tabs
+// ===== TABS =====
 document.querySelectorAll('.tab').forEach(function(tab) {
   tab.addEventListener('click', function() {
     var name = this.dataset.tab;
+    if (!name) return;
     if (name !== 'scan') stopCamera();
     document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
-    document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
     this.classList.add('active');
-    document.getElementById('tab-' + name).classList.add('active');
+    ['scan','customers','redeem','notify','settings-tab'].forEach(function(t) {
+      document.getElementById('tab-' + t).style.display = 'none';
+    });
+    document.getElementById('tab-' + name).style.display = 'block';
     if (name === 'customers') loadCustomers();
+    if (name === 'settings-tab') loadEmployees();
   });
 });
 
-// Scan Mode
+// ===== SCAN MODE =====
 function switchMode(mode) {
-  document.getElementById('mode-camera-btn').classList.toggle('active', mode === 'camera');
-  document.getElementById('mode-manual-btn').classList.toggle('active', mode === 'manual');
+  document.getElementById('mode-cam').classList.toggle('active', mode === 'camera');
+  document.getElementById('mode-manual').classList.toggle('active', mode === 'manual');
   document.getElementById('camera-mode').style.display = mode === 'camera' ? 'block' : 'none';
   document.getElementById('manual-mode').style.display = mode === 'manual' ? 'block' : 'none';
   if (mode !== 'camera') stopCamera();
 }
 
-// Camera
+// ===== CAMERA =====
 async function startCamera() {
   try {
     var stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } });
     videoStream = stream;
     var video = document.getElementById('qr-video');
     video.srcObject = stream;
-    document.getElementById('camera-inner').style.display = 'block';
+    document.getElementById('camera-wrap').style.display = 'block';
     document.getElementById('start-btn').style.display = 'none';
     document.getElementById('stop-btn').style.display = 'block';
     document.getElementById('camera-status').textContent = 'وجّه على رمز QR في بطاقة العميل';
@@ -447,8 +908,8 @@ async function startCamera() {
 function stopCamera() {
   scannerActive = false;
   if (videoStream) { videoStream.getTracks().forEach(function(t) { t.stop(); }); videoStream = null; }
-  document.getElementById('camera-inner').style.display = 'none';
-  document.getElementById('start-btn').style.display = 'block';
+  document.getElementById('camera-wrap').style.display = 'none';
+  document.getElementById('start-btn').style.display = 'flex';
   document.getElementById('stop-btn').style.display = 'none';
   document.getElementById('camera-status').textContent = 'وجّه الكاميرا على رمز QR في بطاقة العميل';
 }
@@ -479,138 +940,139 @@ function scanFrame() {
 async function scanByCustomerId(customerId) {
   var res = await fetch('/api/scan', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ customerId: customerId, merchantId: merchantId })
+    body: JSON.stringify({ customerId, merchantId })
   });
   var data = await res.json();
   if (data.success) {
     scansToday++; document.getElementById('stat-today').textContent = scansToday;
     addRecent(data.name, data.stamps, data.stampsRequired, data.giftEarned);
-    if (data.giftEarned) {
-      document.getElementById('gift-banner').style.display = 'block';
-      document.getElementById('gift-name').textContent = data.name + ' حصل على هدية! 🎁';
-      document.getElementById('result-card').style.display = 'none';
-      document.getElementById('camera-status').textContent = '🎁 ' + data.name + ' — وجّه على بطاقة أخرى';
-      setTimeout(function() { document.getElementById('gift-banner').style.display = 'none'; document.getElementById('camera-status').textContent = 'وجّه على رمز QR في بطاقة العميل'; }, 4000);
-    } else {
-      document.getElementById('gift-banner').style.display = 'none';
-      showResult(data);
-      setTimeout(function() { document.getElementById('camera-status').textContent = 'وجّه على رمز QR في بطاقة العميل'; }, 3000);
-    }
+    showScanResult(data);
+    if (!data.giftEarned) setTimeout(function() { document.getElementById('camera-status').textContent = 'وجّه على رمز QR في بطاقة العميل'; }, 3000);
   } else {
     document.getElementById('camera-status').textContent = '⚠️ ' + (data.error || 'خطأ');
     setTimeout(function() { document.getElementById('camera-status').textContent = 'وجّه على رمز QR في بطاقة العميل'; }, 3000);
   }
 }
 
-// Merchant
+function showScanResult(data) {
+  if (data.giftEarned) {
+    document.getElementById('gift-banner').style.display = 'block';
+    document.getElementById('gift-name').textContent = '🎁 ' + data.name + ' — حصل على هدية!';
+    document.getElementById('result-banner').style.display = 'none';
+    setTimeout(function() { document.getElementById('gift-banner').style.display = 'none'; document.getElementById('camera-status').textContent = 'وجّه على رمز QR في بطاقة العميل'; }, 5000);
+  } else {
+    document.getElementById('gift-banner').style.display = 'none';
+    document.getElementById('result-banner').style.display = 'block';
+    document.getElementById('res-name').textContent = data.name;
+    var stampsEl = document.getElementById('res-stamps');
+    stampsEl.innerHTML = '';
+    for (var i = 0; i < data.stampsRequired; i++) {
+      var s = document.createElement('div');
+      s.className = 'stamp ' + (i < data.stamps ? 'filled' : 'empty');
+      s.textContent = merchantData.icon || '☕';
+      stampsEl.appendChild(s);
+    }
+    setTimeout(function() { document.getElementById('result-banner').style.display = 'none'; }, 4000);
+  }
+}
+
+// ===== MERCHANT =====
 async function loadMerchant() {
   var res = await fetch('/api/merchant/' + merchantId);
   var data = await res.json();
   if (data.error) return;
   merchantData = data;
-  document.getElementById('merchant-name').textContent = data.name;
+  document.getElementById('hdr-name').textContent = data.name;
+  document.getElementById('hdr-avatar').textContent = data.icon || '🏪';
   document.getElementById('stat-customers').textContent = data.customersCount || 0;
   document.getElementById('stat-today').textContent = data.stampsToday || 0;
   document.getElementById('stat-stamps').textContent = data.stampsRequired || 4;
   document.getElementById('info-stamps').textContent = data.stampsRequired || 4;
-  if (!data.active) {
-    document.getElementById('inactive-banner').style.display = 'block';
-    document.getElementById('scan-btn').disabled = true;
-    document.getElementById('redeem-btn').disabled = true;
-  }
+  if (!data.active) { document.getElementById('inactive-bar').style.display = 'block'; document.getElementById('scan-btn').disabled = true; document.getElementById('redeem-btn').disabled = true; }
 }
 
-// Manual Scan
+// ===== MANUAL SCAN =====
 document.getElementById('scan-btn').addEventListener('click', function() {
   var code = document.getElementById('code-input').value.trim();
-  if (!code) return;
-  manualScan(code);
+  if (code) doManualScan(code);
 });
 document.getElementById('code-input').addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') { var c = this.value.trim(); if (c) manualScan(c); }
+  if (e.key === 'Enter') { var c = this.value.trim(); if (c) doManualScan(c); }
 });
 
-async function manualScan(code) {
+async function doManualScan(code) {
   var btn = document.getElementById('scan-btn');
-  btn.disabled = true; btn.textContent = 'جاري...';
+  btn.disabled = true; btn.innerHTML = 'جاري...';
   var res = await fetch('/api/scan-by-code', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code: code, merchantId: merchantId })
+    body: JSON.stringify({ code, merchantId })
   });
   var data = await res.json();
-  btn.disabled = false; btn.textContent = '✓ إضافة ختمة';
+  btn.disabled = false; btn.innerHTML = '✓ إضافة ختمة';
   document.getElementById('code-input').value = '';
   if (data.success) {
     scansToday++; document.getElementById('stat-today').textContent = scansToday;
     addRecent(data.name, data.stamps, data.stampsRequired, data.giftEarned);
-    if (data.giftEarned) {
-      document.getElementById('gift-banner').style.display = 'block';
-      document.getElementById('gift-name').textContent = data.name + ' حصل على هدية! 🎁';
-      document.getElementById('result-card').style.display = 'none';
-      setTimeout(function() { document.getElementById('gift-banner').style.display = 'none'; }, 5000);
-    } else {
-      document.getElementById('gift-banner').style.display = 'none';
-      showResult(data);
-    }
+    showScanResult(data);
   } else { alert(data.error || 'رقم غير صحيح'); }
 }
 
-function showResult(data) {
-  document.getElementById('result-card').style.display = 'block';
-  document.getElementById('res-name').textContent = data.name;
-  var cups = document.getElementById('res-cups');
-  cups.innerHTML = '';
-  for (var i = 0; i < data.stampsRequired; i++) {
-    var c = document.createElement('span');
-    c.className = 'cup' + (i < data.stamps ? '' : ' empty');
-    c.textContent = merchantData.icon || '☕';
-    cups.appendChild(c);
-  }
-  document.getElementById('res-text').textContent = 'باقي ' + (data.stampsRequired - data.stamps) + ' زيارة للهدية';
-}
-
 function addRecent(name, stamps, total, gift) {
-  recentOps.unshift({ name: name, stamps: stamps, total: total, gift: gift, time: new Date() });
+  recentOps.unshift({ name, stamps, total, gift, time: new Date() });
   if (recentOps.length > 10) recentOps.pop();
   var list = document.getElementById('recent-list');
   list.innerHTML = recentOps.map(function(op) {
-    return '<div class="recent-item"><div class="avatar">' + op.name[0] + '</div><div><div class="item-name">' + op.name + '</div><div class="item-sub">' + (op.gift ? '🎁 حصل على هدية' : (merchantData.icon||'☕') + ' ' + op.stamps + '/' + op.total) + '</div></div><div class="item-time">' + op.time.toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'}) + '</div></div>';
+    var icon = op.gift ? '🎁' : (merchantData.icon || '☕');
+    var sub = op.gift ? 'حصل على هدية 🎁' : (icon + ' ' + op.stamps + '/' + op.total + ' ختمات');
+    return '<div class="list-item"><div class="avatar' + (op.gift ? ' gift' : '') + '">' + op.name[0] + '</div>' +
+      '<div><div class="item-name">' + op.name + '</div><div class="item-sub">' + sub + '</div></div>' +
+      '<div class="item-right"><div class="item-time">' + op.time.toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'}) + '</div></div></div>';
   }).join('');
 }
 
-// Redeem
+// ===== REDEEM =====
 document.getElementById('redeem-btn').addEventListener('click', doRedeem);
 async function doRedeem() {
   var code = document.getElementById('redeem-input').value.trim();
   if (!code) return;
   var btn = document.getElementById('redeem-btn');
-  btn.disabled = true; btn.textContent = 'جاري...';
+  btn.disabled = true; btn.innerHTML = 'جاري...';
   var res = await fetch('/api/redeem', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code: code, merchantId: merchantId })
+    body: JSON.stringify({ code, merchantId })
   });
   var data = await res.json();
-  btn.disabled = false; btn.textContent = '🎁 استرداد هدية';
+  btn.disabled = false; btn.innerHTML = '🎁 استرداد هدية';
   if (data.success) {
     document.getElementById('redeem-input').value = '';
-    document.getElementById('redeem-banner').style.display = 'block';
-    document.getElementById('redeem-text').textContent = '✓ تم استرداد هدية ' + data.name;
-    document.getElementById('redeem-sub').textContent = 'رصيد الهدايا المتبقي: ' + data.remainingGifts;
-    setTimeout(function() { document.getElementById('redeem-banner').style.display = 'none'; }, 5000);
+    document.getElementById('redeem-success').style.display = 'block';
+    document.getElementById('redeem-success-text').textContent = '✓ تم استرداد هدية ' + data.name;
+    document.getElementById('redeem-success-sub').textContent = 'رصيد الهدايا المتبقي: ' + data.remainingGifts;
+    setTimeout(function() { document.getElementById('redeem-success').style.display = 'none'; }, 5000);
   } else { alert(data.error || 'خطأ'); }
 }
 
-// Customers
+// ===== CUSTOMERS =====
 async function loadCustomers() {
-  var res = await fetch('/api/merchant/' + merchantId + '/customers', { headers: { 'x-merchant-pin': localStorage.getItem('pin_' + merchantId) || '' } });
+  var auth = JSON.parse(localStorage.getItem('auth_' + merchantId) || '{}');
+  var res = await fetch('/api/merchant/' + merchantId + '/customers', {
+    headers: { 'x-merchant-pin': auth.pin || '' }
+  });
   allCustomers = await res.json();
   renderCustomers(allCustomers);
 }
 function renderCustomers(list) {
   var el = document.getElementById('customers-list');
-  if (!list.length) { el.innerHTML = '<div class="empty-state">لا يوجد عملاء بعد</div>'; return; }
+  if (!list.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div>لا يوجد عملاء بعد</div>'; return; }
   el.innerHTML = list.map(function(c) {
-    return '<div class="customer-item"><div class="avatar">' + c.name[0] + '</div><div style="flex:1"><div class="item-name">' + c.name + '</div><div class="item-sub">' + (c.phone||'') + ' &#8226; ' + (c.shortCode||'') + '</div><div class="item-sub">' + (c.lastVisit ? 'آخر زيارة: ' + new Date(c.lastVisit).toLocaleDateString('ar-SA') : 'لم يزر بعد') + '</div></div><div class="customer-badges"><span class="badge badge-stamps">' + (merchantData.icon||'☕') + ' ' + c.stamps + '/' + (merchantData.stampsRequired||4) + '</span>' + (c.totalGifts > 0 ? '<span class="badge badge-gifts">🎁 ' + c.totalGifts + '</span>' : '') + '</div></div>';
+    var initials = c.name ? c.name[0] : '?';
+    var lastVisit = c.lastVisit ? 'آخر زيارة: ' + new Date(c.lastVisit).toLocaleDateString('ar-SA') : 'لم يزر بعد';
+    return '<div class="customer-item"><div class="avatar">' + initials + '</div>' +
+      '<div class="c-info"><div class="c-name">' + c.name + '</div>' +
+      '<div class="c-meta">' + (c.phone||'') + (c.phone ? ' · ' : '') + (c.shortCode||'') + '</div>' +
+      '<div class="c-meta">' + lastVisit + '</div></div>' +
+      '<div class="c-badges"><span class="badge badge-blue">' + (merchantData.icon||'☕') + ' ' + c.stamps + '/' + (merchantData.stampsRequired||4) + '</span>' +
+      (c.totalGifts > 0 ? '<span class="badge badge-gold">🎁 ' + c.totalGifts + '</span>' : '') + '</div></div>';
   }).join('');
 }
 document.getElementById('search-input').addEventListener('input', function() {
@@ -620,17 +1082,55 @@ document.getElementById('search-input').addEventListener('input', function() {
   }));
 });
 
-// Settings
-document.getElementById('settings-btn').addEventListener('click', function() {
-  document.getElementById('s-name').value = merchantData.name || '';
-  document.getElementById('s-stamps').value = merchantData.stampsRequired || 4;
-  selectedColor = merchantData.color || 'rgb(133,17,9)';
-  selectedIcon = merchantData.icon || '☕';
-  document.querySelectorAll('.color-opt').forEach(function(el) { el.classList.toggle('selected', el.dataset.color === selectedColor); });
-  document.querySelectorAll('.icon-opt').forEach(function(el) { el.classList.toggle('selected', el.dataset.icon === selectedIcon); });
-  document.getElementById('settings-modal').classList.add('show');
+// ===== EMPLOYEES =====
+async function loadEmployees() {
+  var res = await fetch('/api/merchant/' + merchantId + '/employees', {
+    headers: { 'x-merchant-pin': JSON.parse(localStorage.getItem('auth_' + merchantId)||'{}').pin || '' }
+  });
+  var data = await res.json();
+  var el = document.getElementById('employees-list');
+  if (!data.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">👷</div>لا يوجد موظفون بعد</div>'; return; }
+  el.innerHTML = data.map(function(emp) {
+    return '<div class="emp-item"><div class="emp-avatar">' + (emp.name[0]||'م') + '</div>' +
+      '<div><div class="emp-name">' + emp.name + '</div><div class="emp-meta">@' + emp.username + '</div></div>' +
+      '<button class="emp-del" onclick="deleteEmployee('' + emp.username + '')">🗑</button></div>';
+  }).join('');
+}
+
+document.getElementById('save-emp-btn').addEventListener('click', async function() {
+  var name = document.getElementById('emp-name-input').value.trim();
+  var username = document.getElementById('emp-user-input').value.trim();
+  var password = document.getElementById('emp-pass-input').value.trim();
+  if (!name || !username || !password) { alert('أكمل جميع الحقول'); return; }
+  var auth = JSON.parse(localStorage.getItem('auth_' + merchantId)||'{}');
+  var res = await fetch('/api/merchant/' + merchantId + '/employees', {
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'x-merchant-pin': auth.pin || '' },
+    body: JSON.stringify({ name, username, password })
+  });
+  var data = await res.json();
+  if (data.success) {
+    closeModal('add-emp-modal');
+    document.getElementById('emp-name-input').value = '';
+    document.getElementById('emp-user-input').value = '';
+    document.getElementById('emp-pass-input').value = '';
+    loadEmployees();
+  } else { alert(data.error || 'حدث خطأ'); }
 });
-document.getElementById('cancel-settings-btn').addEventListener('click', function() { document.getElementById('settings-modal').classList.remove('show'); });
+
+async function deleteEmployee(username) {
+  if (!confirm('حذف الموظف ' + username + '؟')) return;
+  var auth = JSON.parse(localStorage.getItem('auth_' + merchantId)||'{}');
+  await fetch('/api/merchant/' + merchantId + '/employees/' + username, {
+    method: 'DELETE', headers: { 'x-merchant-pin': auth.pin || '' }
+  });
+  loadEmployees();
+}
+
+// ===== SHOP SETTINGS =====
+document.getElementById('settings-btn').addEventListener('click', function() {
+  switchTab('settings-tab');
+});
+
 document.querySelectorAll('.color-opt').forEach(function(el) {
   el.addEventListener('click', function() {
     document.querySelectorAll('.color-opt').forEach(function(e) { e.classList.remove('selected'); });
@@ -649,62 +1149,97 @@ document.querySelectorAll('.icon-opt').forEach(function(el) {
     el.classList.add('selected'); selectedIcon = el.dataset.icon;
   });
 });
+
+function openModal(id) {
+  if (id === 'shop-modal') {
+    document.getElementById('s-name').value = merchantData.name || '';
+    document.getElementById('s-stamps').value = merchantData.stampsRequired || 4;
+    selectedColor = merchantData.color || 'rgb(30,58,95)';
+    selectedIcon = merchantData.icon || '☕';
+    document.querySelectorAll('.color-opt').forEach(function(el) { el.classList.toggle('selected', el.dataset.color === selectedColor); });
+    document.querySelectorAll('.icon-opt').forEach(function(el) { el.classList.toggle('selected', el.dataset.icon === selectedIcon); });
+  }
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.getElementById('save-shop-btn').addEventListener('click', async function() {
+  var name = document.getElementById('s-name').value.trim();
+  var stamps = parseInt(document.getElementById('s-stamps').value);
+  if (!name) { alert('أدخل اسم المحل'); return; }
+  var res = await fetch('/api/merchant/' + merchantId, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, color: selectedColor, stampsRequired: stamps, icon: selectedIcon })
+  });
+  var data = await res.json();
+  if (data.success) { closeModal('shop-modal'); loadMerchant(); alert('تم الحفظ ✓'); }
+});
+
+document.getElementById('save-images-btn').addEventListener('click', async function() {
+  var lf = document.getElementById('logo-file').files[0];
+  var sf = document.getElementById('strip-file').files[0];
+  if (!lf && !sf) { alert('اختر صورة'); return; }
+  this.disabled = true; this.textContent = 'جاري الرفع...';
+  if (lf) { var fd = new FormData(); fd.append('image', lf); await fetch('/api/merchant/'+merchantId+'/upload-logo', { method:'POST', body:fd }); }
+  if (sf) { var fd2 = new FormData(); fd2.append('image', sf); await fetch('/api/merchant/'+merchantId+'/upload-strip', { method:'POST', body:fd2 }); }
+  this.disabled = false; this.textContent = 'رفع الصور';
+  closeModal('images-modal'); alert('تم الرفع ✓');
+});
+
+document.getElementById('save-pin-btn').addEventListener('click', async function() {
+  var newPin = document.getElementById('new-pin-input').value.trim();
+  if (newPin.length < 4) { alert('أدخل PIN من 4 أرقام على الأقل'); return; }
+  var auth = JSON.parse(localStorage.getItem('auth_' + merchantId)||'{}');
+  var res = await fetch('/api/merchant/' + merchantId, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pin: newPin })
+  });
+  var data = await res.json();
+  if (data.success) {
+    auth.pin = newPin;
+    localStorage.setItem('auth_' + merchantId, JSON.stringify(auth));
+    closeModal('pin-modal');
+    alert('تم تغيير PIN ✓');
+  }
+});
+
+// File previews
 document.getElementById('logo-file').addEventListener('change', function() {
   if (this.files[0]) { var r = new FileReader(); r.onload = function(e) { var img = document.getElementById('logo-preview'); img.src = e.target.result; img.style.display = 'block'; }; r.readAsDataURL(this.files[0]); }
 });
 document.getElementById('strip-file').addEventListener('change', function() {
   if (this.files[0]) { var r = new FileReader(); r.onload = function(e) { var img = document.getElementById('strip-preview'); img.src = e.target.result; img.style.display = 'block'; }; r.readAsDataURL(this.files[0]); }
 });
-document.getElementById('save-settings-btn').addEventListener('click', async function() {
-  var name = document.getElementById('s-name').value.trim();
-  var stampsRequired = parseInt(document.getElementById('s-stamps').value);
-  if (!name) { alert('أدخل اسم المحل'); return; }
-  var res = await fetch('/api/merchant/' + merchantId, {
-    method: 'PUT', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: name, color: selectedColor, stampsRequired: stampsRequired, icon: selectedIcon })
+
+function switchTab(name) {
+  stopCamera();
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  var tabEl = document.querySelector('[data-tab="' + name + '"]');
+  if (tabEl) tabEl.classList.add('active');
+  ['scan','customers','redeem','notify','settings-tab'].forEach(function(t) {
+    document.getElementById('tab-' + t).style.display = 'none';
   });
-  var data = await res.json();
-  if (data.success) {
-    var lf = document.getElementById('logo-file').files[0];
-    var sf = document.getElementById('strip-file').files[0];
-    if (lf) { var fd = new FormData(); fd.append('image', lf); await fetch('/api/merchant/'+merchantId+'/upload-logo', { method:'POST', body:fd }); }
-    if (sf) { var fd2 = new FormData(); fd2.append('image', sf); await fetch('/api/merchant/'+merchantId+'/upload-strip', { method:'POST', body:fd2 }); }
-    document.getElementById('settings-modal').classList.remove('show');
-    loadMerchant(); alert('تم الحفظ ✓');
-  }
-});
+  document.getElementById('tab-' + name).style.display = 'block';
+  if (name === 'settings-tab') loadEmployees();
+}
 
-setInterval(function() { document.getElementById('merchant-time').textContent = new Date().toLocaleTimeString('ar-SA'); }, 1000);
-checkPin();
-</script>
-
-<script>
+// ===== NOTIFY =====
 async function sendNotify() {
   var msg = document.getElementById('notify-msg').value.trim();
   if (!msg) { document.getElementById('notify-result').textContent = '⚠️ اكتب رسالة أولاً'; return; }
   var btn = document.getElementById('notify-btn');
   btn.disabled = true; btn.textContent = 'جاري الإرسال...';
+  var auth = JSON.parse(localStorage.getItem('auth_' + merchantId)||'{}');
   try {
     var res = await fetch('/api/merchant/' + merchantId + '/notify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        message: msg, 
-        pin: localStorage.getItem('pin_' + merchantId),
-        relevantDate: new Date(Date.now() + 5000).toISOString()
-      })
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: msg, pin: auth.pin })
     });
     var data = await res.json();
     if (data.success) {
       document.getElementById('notify-result').innerHTML = '✅ تم الإرسال لـ ' + data.sent + ' عميل';
       document.getElementById('notify-msg').value = '';
-    } else if (data.error === 'PIN غير صحيح') {
-      const newPin = prompt('PIN غير صحيح — أدخل PIN الصحيح:');
-      if (newPin) localStorage.setItem('pin_' + merchantId, newPin);
-      document.getElementById('notify-result').textContent = '⚠️ أعد المحاولة';
-    } else {
-      document.getElementById('notify-result').textContent = '❌ ' + (data.error || 'خطأ');
-    }
+    } else { document.getElementById('notify-result').textContent = '❌ ' + (data.error||'خطأ'); }
   } catch(e) { document.getElementById('notify-result').textContent = '❌ حدث خطأ'; }
   btn.disabled = false; btn.textContent = '📢 إرسال للكل';
 }
@@ -717,14 +1252,18 @@ async function setGeoLocation() {
   navigator.geolocation.getCurrentPosition(async function(pos) {
     try {
       var res = await fetch('/api/merchant/' + merchantId, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ lat: pos.coords.latitude, lng: pos.coords.longitude, geoMessage: msg || 'مرحباً! ختمتك تنتظرك 👋' })
       });
-      if (res.ok) { result.innerHTML = '✅ تم حفظ الموقع!'; result.style.color = '#10B981'; }
+      if (res.ok) { result.innerHTML = '✅ تم حفظ الموقع!'; result.style.color = 'var(--success)'; }
     } catch(e) { result.textContent = '❌ حدث خطأ'; }
   }, function() { result.textContent = '❌ لم يتم السماح بالوصول للموقع'; });
 }
+
+// Clock
+setInterval(function() { document.getElementById('hdr-time').textContent = new Date().toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'}); }, 1000);
+
+checkSavedAuth();
 </script>
 </body>
 </html>
