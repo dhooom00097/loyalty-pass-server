@@ -380,7 +380,7 @@ app.post('/api/merchant/:merchantId/notify', async (req, res) => {
       // نحدث حقل الرسالة في Firebase عشان Apple تبعث إشعار تحديث
       promises.push(
         db.collection('customers').doc(doc.id).update({ 
-          lastMessage: merchantName + ': ' + message,
+          lastMessage: message,
           lastMessageAt: admin.firestore.FieldValue.serverTimestamp(),
           relevantDate: new Date(Date.now() + 5000).toISOString()
         }).then(() => {
