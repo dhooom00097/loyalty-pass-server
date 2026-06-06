@@ -329,14 +329,37 @@ app.post('/api/redeem', async (req, res) => {
 
 
 // التحقق من PIN التاجر
-app.post('/api/merchant/:merchantId/verify-pin', pinLimiter, async (req, res) => {
+app.post('/api/merchant/:merchantId/verify-pin', async (req, res) => {
   try {
     const { pin } = req.body;
-    const doc = await db.collection('merchants').doc(req.params.merchantId).get();
+    const merchantId = req.params.merchantId;
+    const attemptsRef = db.collection('loginAttempts').doc(merchantId);
+    const attemptsDoc = await attemptsRef.get();
+    const now = Date.now();
+    
+    if (attemptsDoc.exists) {
+      const data = attemptsDoc.data();
+      if (data.blockedUntil && now < data.blockedUntil) {
+        const mins = Math.ceil((data.blockedUntil - now) / 60000);
+        return res.status(429).json({ error: 'محاولات كثيرة، انتظر ' + mins + ' دقيقة' });
+      }
+    }
+    
+    const doc = await db.collection('merchants').doc(merchantId).get();
     if (!doc.exists) return res.status(404).json({ error: 'غير موجود' });
     const merchant = doc.data();
     if (!merchant.pin) return res.status(400).json({ error: 'لم يتم تعيين PIN' });
-    if (merchant.pin !== pin) return res.status(401).json({ error: 'PIN غير صحيح' });
+    
+    if (merchant.pin !== pin) {
+      const current = attemptsDoc.exists ? attemptsDoc.data() : { count: 0 };
+      const newCount = (current.count || 0) + 1;
+      const update = { count: newCount, lastAttempt: now };
+      if (newCount >= 5) { update.blockedUntil = now + 15 * 60 * 1000; update.count = 0; }
+      await attemptsRef.set(update, { merge: true });
+      return res.status(401).json({ error: 'PIN غير صحيح' });
+    }
+    
+    await attemptsRef.delete();
     res.json({ success: true, name: merchant.name });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
