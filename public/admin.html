@@ -13,18 +13,17 @@ body { font-family: -apple-system, sans-serif; background: #0a0a0a; color: #fff;
 .login-sub { font-size: 13px; color: #666; text-align: center; margin-bottom: 32px; }
 .field { margin-bottom: 16px; }
 label { display: block; font-size: 13px; color: #888; margin-bottom: 8px; }
-input { width: 100%; background: #111; border: 1px solid #333; border-radius: 12px; padding: 14px 16px; font-size: 15px; color: #fff; outline: none; font-family: inherit; }
+input[type=email], input[type=password], input[type=text], input[type=tel], input[type=number], input[type=date], input[type=color] {
+  width: 100%; background: #111; border: 1px solid #333; border-radius: 12px; padding: 14px 16px; font-size: 15px; color: #fff; outline: none; font-family: inherit;
+}
 input:focus { border-color: #F5C47A; }
 .btn-primary { width: 100%; background: #851109; color: #F5C47A; border: none; border-radius: 12px; padding: 16px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 8px; }
-.btn-primary:hover { opacity: 0.9; }
 .error-msg { color: #f44336; font-size: 13px; text-align: center; margin-top: 12px; }
-
-/* Dashboard */
 .dashboard { display: none; }
 .header { background: #1a1a1a; border-bottom: 1px solid #2a2a2a; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
 .header-title { font-size: 18px; font-weight: 700; color: #F5C47A; }
 .logout-btn { background: #2a2a2a; border: none; color: #888; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: inherit; }
-.content { padding: 24px; max-width: 1200px; margin: 0 auto; }
+.content { padding: 24px; max-width: 1100px; margin: 0 auto; }
 .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
 .stat-card { background: #1a1a1a; border-radius: 16px; padding: 20px; border: 1px solid #2a2a2a; }
 .stat-num { font-size: 32px; font-weight: 700; color: #F5C47A; }
@@ -40,44 +39,35 @@ input:focus { border-color: #F5C47A; }
 .merchant-phone { font-size: 13px; color: #888; margin-top: 2px; }
 .badge-active { background: #1a4a1a; color: #4CAF50; padding: 4px 10px; border-radius: 999px; font-size: 12px; }
 .badge-inactive { background: #4a1a1a; color: #f44336; padding: 4px 10px; border-radius: 999px; font-size: 12px; }
-.toggle-btn { background: #2a2a2a; border: none; color: #fff; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-family: inherit; }
-.toggle-btn:hover { background: #333; }
+.action-btns { display: flex; gap: 6px; }
+.toggle-btn { background: #2a2a2a; border: none; color: #fff; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; font-family: inherit; }
+.edit-btn { background: #2a1a0a; border: none; color: #F5C47A; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; font-family: inherit; }
 .price-tag { font-size: 13px; color: #F5C47A; }
-
-/* Modal */
 .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
 .modal-overlay.show { display: flex; }
-.modal { background: #1a1a1a; border-radius: 20px; padding: 32px; width: 100%; max-width: 480px; border: 1px solid #2a2a2a; }
+.modal { background: #1a1a1a; border-radius: 20px; padding: 32px; width: 100%; max-width: 480px; border: 1px solid #2a2a2a; max-height: 90vh; overflow-y: auto; }
 .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 24px; color: #F5C47A; }
 .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .modal-grid .full { grid-column: 1 / -1; }
 .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
 .btn-cancel { flex: 1; background: #2a2a2a; border: none; color: #fff; border-radius: 12px; padding: 14px; font-size: 15px; cursor: pointer; font-family: inherit; }
 .btn-save { flex: 2; background: #851109; color: #F5C47A; border: none; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; }
-.color-preview { width: 36px; height: 36px; border-radius: 8px; border: 1px solid #333; margin-top: 8px; }
+.merchant-link { font-size: 11px; color: #4CAF50; margin-top: 4px; word-break: break-all; }
 </style>
 </head>
 <body>
 
-<!-- Login -->
 <div class="login-wrap" id="login-wrap">
   <div class="login-card">
     <div class="login-title">🔐 لوحة الإدارة</div>
     <div class="login-sub">نظام بطاقات الولاء</div>
-    <div class="field">
-      <label>البريد الإلكتروني</label>
-      <input type="email" id="login-email" placeholder="admin@example.com" />
-    </div>
-    <div class="field">
-      <label>كلمة السر</label>
-      <input type="password" id="login-pass" placeholder="••••••••" />
-    </div>
+    <div class="field"><label>البريد الإلكتروني</label><input type="email" id="login-email" placeholder="admin@example.com" /></div>
+    <div class="field"><label>كلمة السر</label><input type="password" id="login-pass" placeholder="••••••••" /></div>
     <button class="btn-primary" onclick="doLogin()">دخول</button>
     <div class="error-msg" id="login-error"></div>
   </div>
 </div>
 
-<!-- Dashboard -->
 <div class="dashboard" id="dashboard">
   <div class="header">
     <div class="header-title">⚙️ لوحة الإدارة</div>
@@ -89,38 +79,31 @@ input:focus { border-color: #F5C47A; }
       <div class="stat-card"><div class="stat-num" id="stat-active">-</div><div class="stat-lbl">تجار نشطين</div></div>
       <div class="stat-card"><div class="stat-num" id="stat-customers">-</div><div class="stat-lbl">إجمالي العملاء</div></div>
     </div>
-
     <div class="section-header">
       <div class="section-title">التجار</div>
       <button class="add-btn" onclick="showAddModal()">+ إضافة تاجر</button>
     </div>
-
     <div class="merchants-table">
       <div class="table-header">
-        <span>التاجر</span>
-        <span>العملاء</span>
-        <span>الختمات</span>
-        <span>سعر الاشتراك</span>
-        <span>الحالة</span>
-        <span>إجراء</span>
+        <span>التاجر</span><span>العملاء</span><span>الختمات</span><span>سعر الاشتراك</span><span>الحالة</span><span>إجراء</span>
       </div>
       <div id="merchants-list"></div>
     </div>
   </div>
 </div>
 
-<!-- Modal إضافة تاجر -->
+<!-- Modal إضافة -->
 <div class="modal-overlay" id="add-modal">
   <div class="modal">
     <div class="modal-title">إضافة تاجر جديد</div>
     <div class="modal-grid">
       <div class="full field"><label>اسم المحل</label><input type="text" id="m-name" placeholder="حدق الشاي" /></div>
-      <div class="field"><label>PIN التاجر (4 أرقام)</label><input type="number" id="m-pin" placeholder="1234" max="9999" min="1000" /></div>
       <div class="field"><label>رقم الجوال</label><input type="tel" id="m-phone" placeholder="05xxxxxxxx" /></div>
+      <div class="field"><label>PIN التاجر (4 أرقام)</label><input type="number" id="m-pin" placeholder="1234" min="1000" max="9999" /></div>
       <div class="field"><label>عدد الختمات للهدية</label><input type="number" id="m-stamps" value="4" min="1" max="20" /></div>
       <div class="field"><label>سعر الاشتراك (ريال)</label><input type="number" id="m-price" placeholder="99" /></div>
       <div class="field"><label>تاريخ الاشتراك</label><input type="date" id="m-date" /></div>
-      <div class="field"><label>لون البطاقة</label><input type="color" id="m-color" value="#851109" /><div class="color-preview" id="color-preview" style="background:#851109;"></div></div>
+      <div class="field"><label>لون البطاقة</label><input type="color" id="m-color" value="#851109" /></div>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="hideAddModal()">إلغاء</button>
@@ -129,9 +112,29 @@ input:focus { border-color: #F5C47A; }
   </div>
 </div>
 
+<!-- Modal تعديل -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-title">تعديل التاجر</div>
+    <div class="modal-grid">
+      <div class="full field"><label>اسم المحل</label><input type="text" id="e-name" /></div>
+      <div class="field"><label>رقم الجوال</label><input type="tel" id="e-phone" /></div>
+      <div class="field"><label>PIN التاجر (4 أرقام)</label><input type="number" id="e-pin" placeholder="1234" min="1000" max="9999" /></div>
+      <div class="field"><label>عدد الختمات للهدية</label><input type="number" id="e-stamps" min="1" max="20" /></div>
+      <div class="field"><label>سعر الاشتراك (ريال)</label><input type="number" id="e-price" /></div>
+      <div class="field"><label>تاريخ الاشتراك</label><input type="date" id="e-date" /></div>
+      <div class="field"><label>لون البطاقة</label><input type="color" id="e-color" value="#851109" /></div>
+    </div>
+    <input type="hidden" id="e-id" />
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="hideEditModal()">إلغاء</button>
+      <button class="btn-save" onclick="saveMerchantEdit()">حفظ التغييرات</button>
+    </div>
+  </div>
+</div>
+
 <script>
 let token = localStorage.getItem('admin_token') || '';
-
 if (token) initDashboard();
 
 async function doLogin() {
@@ -163,7 +166,7 @@ function logout() {
   document.getElementById('login-wrap').style.display = 'flex';
 }
 
-async function initDashboard() {
+function initDashboard() {
   document.getElementById('login-wrap').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
   loadStats();
@@ -184,24 +187,27 @@ async function loadMerchants() {
   const merchants = await res.json();
   if (!Array.isArray(merchants)) { logout(); return; }
   const list = document.getElementById('merchants-list');
-  list.innerHTML = merchants.map(m => `
-    <div class="table-row">
-      <div><div class="merchant-name">${m.name}</div><div class="merchant-phone">${m.phone || ''}</div></div>
-      <div>${m.customersCount || 0}</div>
-      <div>${m.stampsRequired || 4} ختمة</div>
-      <div class="price-tag">${m.subscriptionPrice || 0} ر.س</div>
-      <div><span class="${m.active ? 'badge-active' : 'badge-inactive'}">${m.active ? 'نشط' : 'موقف'}</span></div>
-      <div style="display:flex;gap:6px;"><button class="toggle-btn" onclick="toggleMerchant('${m.merchantId}', this)">${m.active ? 'إيقاف' : 'تفعيل'}</button><button class="toggle-btn" style="background:#2a1a0a;color:#F5C47A;" onclick="editMerchant(${JSON.stringify(m).replace(/'/g, '&#39;')})">تعديل</button></div>
-    </div>
-  `).join('');
+  const base = window.location.origin;
+  list.innerHTML = merchants.map(function(m) {
+    return '<div class="table-row">' +
+      '<div><div class="merchant-name">' + m.name + '</div><div class="merchant-phone">' + (m.phone || '') + '</div><div class="merchant-link">' + base + '/merchant/' + m.merchantId + '</div></div>' +
+      '<div>' + (m.customersCount || 0) + '</div>' +
+      '<div>' + (m.stampsRequired || 4) + ' ختمة</div>' +
+      '<div class="price-tag">' + (m.subscriptionPrice || 0) + ' ر.س</div>' +
+      '<div><span class="' + (m.active ? 'badge-active' : 'badge-inactive') + '">' + (m.active ? 'نشط' : 'موقف') + '</span></div>' +
+      '<div class="action-btns">' +
+      '<button class="toggle-btn" onclick="toggleMerchant(\'' + m.merchantId + '\')">' + (m.active ? 'إيقاف' : 'تفعيل') + '</button>' +
+      '<button class="edit-btn" onclick="showEditModal(\'' + m.merchantId + '\',\'' + m.name + '\',\'' + (m.phone||'') + '\',' + (m.stampsRequired||4) + ',' + (m.subscriptionPrice||0) + ',\'' + (m.pin||'') + '\',\'' + (m.subscriptionDate||'') + '\')">تعديل</button>' +
+      '</div>' +
+      '</div>';
+  }).join('');
 }
 
-async function toggleMerchant(merchantId, btn) {
-  const res = await fetch(`/api/admin/merchants/${merchantId}/toggle`, {
+async function toggleMerchant(merchantId) {
+  await fetch('/api/admin/merchants/' + merchantId + '/toggle', {
     method: 'PATCH',
     headers: { Authorization: 'Bearer ' + token }
   });
-  const data = await res.json();
   loadMerchants();
   loadStats();
 }
@@ -215,57 +221,52 @@ function hideAddModal() {
   document.getElementById('add-modal').classList.remove('show');
 }
 
-document.getElementById('m-color').addEventListener('input', e => {
-  document.getElementById('color-preview').style.background = e.target.value;
-});
-
 async function addMerchant() {
   const name = document.getElementById('m-name').value.trim();
   const phone = document.getElementById('m-phone').value.trim();
   const stamps = parseInt(document.getElementById('m-stamps').value);
-  const price = parseFloat(document.getElementById('m-price').value);
+  const price = parseFloat(document.getElementById('m-price').value) || 0;
   const date = document.getElementById('m-date').value;
+  const pin = document.getElementById('m-pin').value;
   const colorHex = document.getElementById('m-color').value;
   const r = parseInt(colorHex.slice(1,3),16);
   const g = parseInt(colorHex.slice(3,5),16);
   const b = parseInt(colorHex.slice(5,7),16);
-  const color = `rgb(${r}, ${g}, ${b})`;
-
+  const color = 'rgb(' + r + ', ' + g + ', ' + b + ')';
   if (!name || !phone) { alert('اسم ورقم الجوال مطلوبان'); return; }
-
   const res = await fetch('/api/admin/merchants', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-    body: JSON.stringify({ name, phone, color, stampsRequired: stamps, subscriptionPrice: price, subscriptionDate: date, pin: document.getElementById("m-pin").value })
+    body: JSON.stringify({ name, phone, color, stampsRequired: stamps, subscriptionPrice: price, subscriptionDate: date, pin })
   });
   const data = await res.json();
   if (data.merchantId) {
     hideAddModal();
     loadMerchants();
     loadStats();
-    alert('تم إضافة التاجر ✓\nالـ merchantId: ' + data.merchantId);
+    alert('تم إضافة التاجر\nالرابط: ' + window.location.origin + '/merchant/' + data.merchantId);
   } else {
     alert(data.error || 'خطأ');
   }
 }
 
-document.getElementById('login-pass').addEventListener('keypress', e => {
-  if (e.key === 'Enter') doLogin();
-});
-
-function editMerchant(m) {
-  document.getElementById('edit-id').value = m.merchantId;
-  document.getElementById('e-name').value = m.name || '';
-  document.getElementById('e-phone').value = m.phone || '';
-  document.getElementById('e-stamps').value = m.stampsRequired || 4;
-  document.getElementById('e-price').value = m.subscriptionPrice || 0;
-  document.getElementById('e-pin').value = m.pin || '';
-  document.getElementById('e-color').value = '#851109';
+function showEditModal(merchantId, name, phone, stamps, price, pin, date) {
+  document.getElementById('e-id').value = merchantId;
+  document.getElementById('e-name').value = name;
+  document.getElementById('e-phone').value = phone;
+  document.getElementById('e-stamps').value = stamps;
+  document.getElementById('e-price').value = price;
+  document.getElementById('e-pin').value = pin;
+  document.getElementById('e-date').value = date ? date.split('T')[0] : '';
   document.getElementById('edit-modal').classList.add('show');
 }
 
+function hideEditModal() {
+  document.getElementById('edit-modal').classList.remove('show');
+}
+
 async function saveMerchantEdit() {
-  const merchantId = document.getElementById('edit-id').value;
+  const merchantId = document.getElementById('e-id').value;
   const colorHex = document.getElementById('e-color').value;
   const r = parseInt(colorHex.slice(1,3),16);
   const g = parseInt(colorHex.slice(3,5),16);
@@ -274,7 +275,8 @@ async function saveMerchantEdit() {
     name: document.getElementById('e-name').value.trim(),
     phone: document.getElementById('e-phone').value.trim(),
     stampsRequired: parseInt(document.getElementById('e-stamps').value),
-    subscriptionPrice: parseFloat(document.getElementById('e-price').value),
+    subscriptionPrice: parseFloat(document.getElementById('e-price').value) || 0,
+    subscriptionDate: document.getElementById('e-date').value,
     color: 'rgb(' + r + ', ' + g + ', ' + b + ')',
     pin: document.getElementById('e-pin').value
   };
@@ -285,68 +287,17 @@ async function saveMerchantEdit() {
   });
   const data = await res.json();
   if (data.success) {
-    document.getElementById('edit-modal').classList.remove('show');
-    loadMerchants();
-    alert('تم الحفظ ✓');
-  } else { alert(data.error || 'خطأ'); }
-}
-</script>
-<div class="modal-overlay" id="edit-modal">
-  <div class="modal">
-    <div class="modal-title">تعديل التاجر</div>
-    <input type="hidden" id="edit-id" />
-    <div class="modal-grid">
-      <div class="full field"><label>اسم المحل</label><input type="text" id="e-name" /></div>
-      <div class="field"><label>رقم الجوال</label><input type="tel" id="e-phone" /></div>
-      <div class="field"><label>عدد الختمات</label><input type="number" id="e-stamps" min="1" max="20" /></div>
-      <div class="field"><label>سعر الاشتراك</label><input type="number" id="e-price" /></div>
-      <div class="field"><label>PIN (4 أرقام)</label><input type="number" id="e-pin" placeholder="1234" min="1000" max="9999" /></div>
-      <div class="field"><label>لون البطاقة</label><input type="color" id="e-color" /></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="document.getElementById('edit-modal').classList.remove('show')">إلغاء</button>
-      <button class="btn-save" onclick="saveMerchantEdit()">حفظ</button>
-    </div>
-  </div>
-</div>
-
-<script>
-function editMerchant(m) {
-  document.getElementById('edit-id').value = m.merchantId;
-  document.getElementById('e-name').value = m.name || '';
-  document.getElementById('e-phone').value = m.phone || '';
-  document.getElementById('e-stamps').value = m.stampsRequired || 4;
-  document.getElementById('e-price').value = m.subscriptionPrice || 0;
-  document.getElementById('e-pin').value = m.pin || '';
-  document.getElementById('edit-modal').classList.add('show');
-}
-
-async function saveMerchantEdit() {
-  const merchantId = document.getElementById('edit-id').value;
-  const colorHex = document.getElementById('e-color').value;
-  const r = parseInt(colorHex.slice(1,3),16);
-  const g = parseInt(colorHex.slice(3,5),16);
-  const b = parseInt(colorHex.slice(5,7),16);
-  const updates = {
-    name: document.getElementById('e-name').value.trim(),
-    phone: document.getElementById('e-phone').value.trim(),
-    stampsRequired: parseInt(document.getElementById('e-stamps').value),
-    subscriptionPrice: parseFloat(document.getElementById('e-price').value),
-    color: 'rgb(' + r + ', ' + g + ', ' + b + ')',
-    pin: document.getElementById('e-pin').value
-  };
-  const res = await fetch('/api/admin/merchants/' + merchantId, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-    body: JSON.stringify(updates)
-  });
-  const data = await res.json();
-  if (data.success) {
-    document.getElementById('edit-modal').classList.remove('show');
+    hideEditModal();
     loadMerchants();
     alert('تم الحفظ');
-  } else { alert(data.error || 'خطأ'); }
+  } else {
+    alert(data.error || 'خطأ');
+  }
 }
+
+document.getElementById('login-pass').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') doLogin();
+});
 </script>
 </body>
 </html>
